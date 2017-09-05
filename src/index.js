@@ -2,13 +2,13 @@
 let t;
 let options = {};
 
-module.exports = function(babel, _options) {
+module.exports = function(babel) {
     t = babel.types;
-    options = _options || options;
     return {
         visitor: {
-            ExpressionStatement(path) {
+            ExpressionStatement(path, state) {
                 const callee = path.node.expression.callee;
+                options = state.opts || options;
 
                 if(!callee) return;
 
