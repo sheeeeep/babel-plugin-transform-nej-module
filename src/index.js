@@ -1,11 +1,10 @@
 
 let t;
-let defaultOptions = {
-    'pro': 'web/js/module'
-}
+let options = {};
 
-module.exports = function(babel, options = defaultOptions) {
+module.exports = function(babel, _options) {
     t = babel.types;
+    options = _options || options;
     return {
         visitor: {
             ExpressionStatement(path) {
