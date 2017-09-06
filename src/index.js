@@ -16,12 +16,12 @@ module.exports = function(babel) {
 
                 if(!callee) return;
 
-                switch(callee.name) {
-                case 'define':
+                if(callee.name === 'name' || 
+                    (t.isMemberExpression(callee) ? 
+                        (callee.object.name.toLocaleLowerCase() == 'nej' && callee.property.name === 'define') : false
+                    )
+                ) {
                     moduleTransform(path);
-                    break;
-                default:
-                    break;
                 }
             }
         }
@@ -42,7 +42,8 @@ const moduleTransform = function(path) {
             return urlTransform(url, name);
         }).concat(content);
 
-    path.replaceWithMultiple(results);
+    // path.replaceWithMultiple(results);
+    targetPath.arguments[0].elements.replaceWith(urls)
 };
 
 const urlTransform = function(url, name) {
