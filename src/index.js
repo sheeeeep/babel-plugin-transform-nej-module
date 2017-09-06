@@ -1,6 +1,10 @@
 
 let t;
 let options = {};
+let fileExt = {
+    'text': '.html',
+    'default': '.js'
+}
 
 module.exports = function(babel) {
     t = babel.types;
@@ -65,7 +69,14 @@ const contentTransform = function(content) {
 };
 
 const spotAlias = function(url) {
-    let _url = url.split('/');
+    let [_fileExtKey, _url] = url.split('!');
+    
+    if(!_url) {
+        _url = _fileExtKey;
+        _fileExtKey = 'default';
+    }
+    _url = _url.split('/');
+
     for(let key in options) {
         _url = _url.map( itm => {
             if(itm === key){                
@@ -79,5 +90,5 @@ const spotAlias = function(url) {
 
     _url.unshift('.');
 
-    return  _url.join('/');
+    return  _url.join('/') + fileExt[_fileExtKey];
 }
