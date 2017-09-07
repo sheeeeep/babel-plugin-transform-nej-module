@@ -1,9 +1,4 @@
 let t;
-let options = {};
-let fileExt = {
-    'text': '',
-    'default': '.js'
-}
 
 module.exports = function (babel) {
     t = babel.types;
@@ -11,9 +6,8 @@ module.exports = function (babel) {
         visitor: {
             CallExpression(path, state) {
                 const callee = path.node.callee,
-                        args = path.node.arguments;
+                    args = path.node.arguments;
                 let _callee, _arguments;
-                options = state.opts || options;
 
                 if (!callee) return;
 
@@ -41,28 +35,30 @@ const normalizeDefine = function () {
 const normalizeUrl = function (arg) {
     const urls = arg.elements;
 
-    const _urls = urls.map(itm => spotAlias(itm.value))
+    const _urls = urls.map(itm => spotBrace(spotExt(itm.value)));
     return t.arrayExpression(_urls);
 }
 
-const spotAlias = function (url) {
+const spotExt = function (url) {
     let [_fileExtKey, _url] = url.split('!');
 
     if (!_url) {
         _url = _fileExtKey;
-        _fileExtKey = 'default';
     }
-    _url = _url.split('/');
+    
 
-    for (let key in options) {
-        _url = _url.map(itm => {
-            if (itm === key) {
-                return options[key];
-            } else {
-                return itm;
-            }
-        });
-    };
+    return _url
+}
 
-    return t.stringLiteral(_url.join('/') + fileExt[_fileExtKey]);
+const spotBrace = function (url) {
+    let _url = url.split(''),
+        [leftPos, rightPos] = [_url.indexOf('{'), _url.indexOf('}')];
+
+    if (rightPos >= 0) {
+        _url.splice(rightPos, 1);
+    }
+    if (leftPos >= 0) {
+        _url.splice(leftPos, 1);
+    }
+    return t.stringLiteral(_url.join(''));
 }
