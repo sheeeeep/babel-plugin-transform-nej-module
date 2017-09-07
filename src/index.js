@@ -20,15 +20,15 @@ module.exports = function (babel) {
 
                     path.node.callee = _callee;
 
-                    if(t.isArrayExpression(path.node.arguments[0])) {
+                    if (t.isArrayExpression(path.node.arguments[0])) {
                         path.node.arguments[0] = normalizeUrl(args[0]);
+                        path.get('arguments.1.body').unshiftContainer('body', injectParams());
+                    }
+
+                    if (t.isFunctionExpression(path.node.arguments[0])) {
                         path.get('arguments.0.body').unshiftContainer('body', injectParams());
                     }
 
-                    if(t.isFunctionExpression(path.node.arguments[0])) {
-                        path.get('arguments.0.body').unshiftContainer('body', injectParams());
-                    }
-   
                 }
             }
         }
@@ -42,7 +42,7 @@ const normalizeDefine = function () {
 const normalizeUrl = function (arg) {
     const urls = arg.elements;
 
-    const _urls = urls.map(itm => spotBrace(spotExt(itm.value)));
+    const _urls = urls.map(itm => spotBrace(spotPlatform(spotExt(itm.value))));
     return t.arrayExpression(_urls);
 }
 
@@ -53,7 +53,22 @@ const spotExt = function (url) {
         _url = _fileExtKey;
     }
 
-    return _url
+    return _url;
+}
+
+const spotPlatform = function (url) {
+    let _url = url.split(''),
+        [leftPos, rightPos] = [_url.indexOf('{'), _url.indexOf('}')];
+
+    if (leftPos >= 0 && rightPos >= 0) {
+        const key = _url.slice(leftPos+1, rightPos).join('');
+      
+        if (key === 'platform') {
+            _url.unshift('./');
+        }
+    }
+
+    return _url.join('');
 }
 
 const spotBrace = function (url) {
@@ -61,10 +76,15 @@ const spotBrace = function (url) {
         [leftPos, rightPos] = [_url.indexOf('{'), _url.indexOf('}')];
 
     if (rightPos >= 0) {
-        _url.splice(rightPos, 1);
+        if (_url[rightPos+1] !== '/') {
+            _url.splice(rightPos, 1, '/');
+        } else {
+            _url.splice(rightPos, 1);
+        }
     }
     if (leftPos >= 0) {
         _url.splice(leftPos, 1);
+
     }
     return t.stringLiteral(_url.join(''));
 }
