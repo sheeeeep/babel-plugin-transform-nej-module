@@ -1,95 +1,64 @@
-
 let t;
-let options = {};
-let fileExt = {
-    'text': '.html',
-    'default': '.js'
-}
 
-module.exports = function(babel) {
+module.exports = function (babel) {
     t = babel.types;
     return {
         visitor: {
-            ExpressionStatement(path, state) {
-                const callee = path.node.expression.callee;
-                options = state.opts || options;
+            CallExpression(path, state) {
+                const callee = path.node.callee,
+                    args = path.node.arguments;
+                let _callee, _arguments;
 
-                if(!callee) return;
+                if (!callee) return;
 
-                if(callee.name === 'name' || 
-                    (t.isMemberExpression(callee) ? 
-                        (callee.object.name.toLocaleLowerCase() == 'nej' && callee.property.name === 'define') : false
-                    )
-                ) {
-                    moduleTransform(path);
+                if ((callee.name === 'define') || ((t.isMemberExpression(callee) ? // nej.define
+                        ((callee.object.name ? callee.object.name.toLocaleLowerCase() == 'nej' : false) &&
+                            callee.property.name === 'define') :
+                        false
+                    ))) {
+                    _callee = normalizeDefine();
+
+                    path.node.callee = _callee;
+                    path.node.arguments[0] = normalizeUrl(args[0]);
+                    // _arguments = [normalizeUrl(args[0]), args[1]];
+                    // path.replaceWith(t.callExpression(_callee, _arguments));
                 }
             }
         }
     };
 };
 
-const moduleTransform = function(path) {
-    const targetPath = path.node.expression;
-    const urls = targetPath.arguments[0].elements.map( itm => {            
-            return t.stringLiteral(spotAlias(itm.value));
-        }),
-        names = targetPath.arguments[1].params.map( itm => {
-            return t.identifier(itm.name);
-        }),
-        content = contentTransform(targetPath.arguments[1].body.body),
-        results = names.map( (name, idx) => {
-            const url = urls[idx];
-            return urlTransform(url, name);
-        }).concat(content);
+const normalizeDefine = function () {
+    return t.identifier('define');
+}
 
-    // path.replaceWithMultiple(results);
-    targetPath.arguments[0].elements.replaceWith(urls)
-};
+const normalizeUrl = function (arg) {
+    const urls = arg.elements;
 
-const urlTransform = function(url, name) {
-    return t.variableDeclaration('const',
-        [t.variableDeclarator(name,
-            t.callExpression(
-                t.identifier('require'),
-                [url]
-            ))
-        ]);
-};
+    const _urls = urls.map(itm => spotBrace(spotExt(itm.value)));
+    return t.arrayExpression(_urls);
+}
 
-const contentTransform = function(content) {
-    return content.map( itm => {
-        if(t.isReturnStatement(itm)) {
-            return t.assignmentExpression('=',
-                t.memberExpression(t.identifier('module'), t.identifier('exports')),
-                itm.argument);
-        }
-        else {
-            return itm;
-        }
-    });
-};
-
-const spotAlias = function(url) {
+const spotExt = function (url) {
     let [_fileExtKey, _url] = url.split('!');
-    
-    if(!_url) {
+
+    if (!_url) {
         _url = _fileExtKey;
-        _fileExtKey = 'default';
     }
-    _url = _url.split('/');
+    
 
-    for(let key in options) {
-        _url = _url.map( itm => {
-            if(itm === key){                
-                return options[key];
-            }
-            else {
-                return itm;
-            }
-        });
-    };
+    return _url
+}
 
-    _url.unshift('.');
+const spotBrace = function (url) {
+    let _url = url.split(''),
+        [leftPos, rightPos] = [_url.indexOf('{'), _url.indexOf('}')];
 
-    return  _url.join('/') + fileExt[_fileExtKey];
+    if (rightPos >= 0) {
+        _url.splice(rightPos, 1);
+    }
+    if (leftPos >= 0) {
+        _url.splice(leftPos, 1);
+    }
+    return t.stringLiteral(_url.join(''));
 }

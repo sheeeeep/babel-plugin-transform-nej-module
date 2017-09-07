@@ -9,6 +9,6 @@
             "request": "launch",
             "name": "Launch Program",
             "program": "${workspaceRoot}/src/index1.js"
-        }
+        } 
     ]
 }
