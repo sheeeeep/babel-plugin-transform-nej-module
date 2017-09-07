@@ -22,12 +22,11 @@ module.exports = function (babel) {
 
                     if(t.isArrayExpression(path.node.arguments[0])) {
                         path.node.arguments[0] = normalizeUrl(args[0]);
-                        path.get('arguments.1.body.body.0').insertBefore(injectParams());
+                        path.get('arguments.0.body').unshiftContainer('body', injectParams());
                     }
 
                     if(t.isFunctionExpression(path.node.arguments[0])) {
-
-                        path.get('arguments.0.body.body.0').insertBefore(injectParams());
+                        path.get('arguments.0.body').unshiftContainer('body', injectParams());
                     }
    
                 }
