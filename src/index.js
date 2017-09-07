@@ -20,8 +20,7 @@ module.exports = function (babel) {
 
                     path.node.callee = _callee;
                     path.node.arguments[0] = normalizeUrl(args[0]);
-                    // _arguments = [normalizeUrl(args[0]), args[1]];
-                    // path.replaceWith(t.callExpression(_callee, _arguments));
+                    path.get('arguments.1.body.body.0').insertBefore(injectParams());
                 }
             }
         }
@@ -61,4 +60,19 @@ const spotBrace = function (url) {
         _url.splice(leftPos, 1);
     }
     return t.stringLiteral(_url.join(''));
+}
+
+const injectParams = function() {
+    let p, o, f, r;
+    p = generateParam(t.identifier('p'), t.identifier('window'));
+    o = generateParam(t.identifier('o'), t.objectExpression([]));
+    f = generateParam(t.identifier('f'), t.functionExpression( null, [], t.blockStatement([t.returnStatement(t.numericLiteral(-1))])));
+    r = generateParam(t.identifier('r'), t.arrayExpression([]));
+    return [p, o, f, r];
+}
+
+const generateParam = function(name, value) {
+    return t.variableDeclaration('let', [
+        t.variableDeclarator(name, value)
+    ])
 }
