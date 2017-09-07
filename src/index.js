@@ -44,7 +44,6 @@ const spotExt = function (url) {
     if (!_url) {
         _url = _fileExtKey;
     }
-    
 
     return _url
 }
@@ -62,16 +61,15 @@ const spotBrace = function (url) {
     return t.stringLiteral(_url.join(''));
 }
 
-const injectParams = function() {
-    let p, o, f, r;
-    p = generateParam(t.identifier('p'), t.identifier('window'));
-    o = generateParam(t.identifier('o'), t.objectExpression([]));
-    f = generateParam(t.identifier('f'), t.functionExpression( null, [], t.blockStatement([t.returnStatement(t.numericLiteral(-1))])));
-    r = generateParam(t.identifier('r'), t.arrayExpression([]));
+const injectParams = function () {
+    let p = generateParam(t.identifier('p'), t.identifier('window')),
+        o = generateParam(t.identifier('o'), t.objectExpression([])),
+        f = generateParam(t.identifier('f'), t.functionExpression(null, [], t.blockStatement([t.returnStatement(t.numericLiteral(-1))]))),
+        r = generateParam(t.identifier('r'), t.arrayExpression([]));
     return [p, o, f, r];
 }
 
-const generateParam = function(name, value) {
+const generateParam = function (name, value) {
     return t.variableDeclaration('let', [
         t.variableDeclarator(name, value)
     ])
