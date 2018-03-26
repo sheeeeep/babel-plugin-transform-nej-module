@@ -151,13 +151,20 @@ module.exports = function (babel) {
                 })
 
                 const content = requires.concat(injectStatements).concat(cbContent).concat(exportStatement);
-                path.replaceWithMultiple(content)
+
+                const rootFunc = t.expressionStatement(
+                    t.callExpression(
+                        t.memberExpression(
+                            t.functionExpression(null, [], t.blockStatement(content)),
+                            t.identifier('call')
+                        ),
+                        [t.identifier('window')]
+                    )
+                )
+                path.replaceWith(rootFunc)
             },
             ReturnStatement(path) {
                 path.replaceWith(createExports(path.node.argument.name));
-            },
-            ThisExpression(path) {
-                path.replaceWith(t.identifier('window'));
             }
         }
     };

@@ -1,7 +1,7 @@
 // run.js
 var fs = require('fs');
 var babel = require('babel-core');
-var plugin = require('./index2');
+var plugin = require('./index');
 
 // read the filename from the command line arguments
 var fileName = process.argv[2];
@@ -26,5 +26,5 @@ fs.readFile(fileName, function (err, data) {
     });
 
     // print the generated code to screen
-    console.log(out.code);
+    // console.log(out.code);
 });
