@@ -6,10 +6,10 @@ module.exports = function (babel) {
 
 
     const getParamFromCallBack = function getParamFromCallBack(callback) {
-        let depsVal = [], cbContent = [];
+        let depsVal = [], cbContent = [], exportStatement;
         if (!t.isFunctionExpression(callback)) {
             return {
-                depsVal, cbContent
+                depsVal, cbContent, exportStatement
             }
         }
 
@@ -19,7 +19,14 @@ module.exports = function (babel) {
 
         cbContent = callback.body.body;
 
-        return { depsVal, cbContent };
+        cbContent = cbContent.filter( cbStatement => {
+            if(t.isReturnStatement(cbStatement)) {
+                exportStatement = createExports(cbStatement.argument.name);
+            }
+            return !t.isReturnStatement(cbStatement);
+        })
+
+        return { depsVal, cbContent, exportStatement };
     }
 
     const normalizeDep = function normalizeDep(dep) {
@@ -120,14 +127,13 @@ module.exports = function (babel) {
                 const deps = args[0].elements.map(element => {
                     return element.value;
                 });
-                const { depsVal, cbContent } = getParamFromCallBack(callback);
+                let { depsVal, cbContent, exportStatement } = getParamFromCallBack(callback);
 
                 const requires = deps.map((dep, idx) => {
                     return createRequire(depsVal[idx], dep); // var depsVal[idx] = require('dep');
                 })
 
                 const injectStatements = [];
-                let exportStatement = [];
                 const injectParams = depsVal.splice(requires.length);
                 injectParams.forEach((injectParam, idx) => {
                     if (idx === 0) {
@@ -162,9 +168,6 @@ module.exports = function (babel) {
                     )
                 )
                 path.replaceWith(rootFunc)
-            },
-            ReturnStatement(path) {
-                path.replaceWith(createExports(path.node.argument.name));
             }
         }
     };
