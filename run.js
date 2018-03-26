@@ -26,5 +26,5 @@ fs.readFile(fileName, function (err, data) {
     });
 
     // print the generated code to screen
-    // console.log(out.code);
+    console.log(out.code);
 });

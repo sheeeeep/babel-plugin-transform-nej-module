@@ -123,10 +123,18 @@ module.exports = function (babel) {
                     return;
                 }
 
-                const callback = args[1];
-                const deps = args[0].elements.map(element => {
-                    return element.value;
-                });
+                let callback, deps;
+                if(args.length === 1) {
+                    callback = args[0];
+                    deps = [];
+                } else {
+                    callback = args[1];
+                    deps = args[0].elements.map(element => {
+                        return element.value;
+                    });
+                }
+
+                
                 let { depsVal, cbContent, exportStatement } = getParamFromCallBack(callback);
 
                 const requires = deps.map((dep, idx) => {
