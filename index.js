@@ -84,7 +84,7 @@ module.exports = function (babel) {
     }
 
     const createExports = function createExports(exportObj) {
-        if( typeof exportName == "string") {
+        if( typeof exportObj == "string") {
             exportObj = t.identifier(exportObj);
         }
 

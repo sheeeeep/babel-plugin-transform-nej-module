@@ -1,54 +1,178 @@
-/**
- * ButtonUI 组件带默认UI实现文件
- *
- * @version  1.0
- * @author   hzshaoyy <hzshaoyy@corp.netease.com>
- * @module   pool/component-button/src/button/ui
+/*
+ * --------------------------------------------
+ * 原生对象扩展接口
+ * @version 1.0
+ * @author  genify(caijf@corp.netease.com)
+ * --------------------------------------------
  */
-NEJ.define( [
-    './component.js',
-    'text!./web/component.html',
-    'text!./web/component.css'
-],function(
-    Button,
-    html,
-    css
-){
+/**
+ * 全局window对象
+ * @external window
+ */
+/**
+ * 全局页面文档对象
+ * @external document
+ */
+/**
+ * 全局location对象
+ * @external location
+ */
+/**
+ * 全局history对象
+ * @external history
+ */
+/**
+ * 内置函数对象扩展
+ * @external Function
+ */
+NEJ.define(function(_p,_o,_f,_r){
+    var _extpro = Function.prototype;
     /**
-     * Button UI组件
+     * AOP增强操作，增强操作接受一个输入参数包含以下信息
      *
-     * @class   module:pool/component-button/src/button/ui.ButtonUI
-     * @extends module:pool/component-button/src/button.Button
+     *  | 参数名称 | 参数类型  | 参数描述 |
+     *  | :--     | :--      | :-- |
+     *  | args    | Array    | 函数调用时实际输入参数，各增强操作中可以改变值后将影响至后续的操作 |
+     *  | value   | Variable | 输出结果 |
+     *  | stopped | Boolean  | 是否结束操作，终止后续操作 |
      *
-     * @param {Object} options
-     * @param {Object} options.data 与视图关联的数据模型
+     * @method external:Function#_$aop
+     * @param  {Function} arg0 - 前置操作，接受一个输入参数，见描述信息
+     * @param  {Function} arg1 - 后置操作，接受一个输入参数，见描述信息
+     * @return {Function}        增强后操作函数
      */
-    return Button.$extends({
-        name     : 'ux-button',
-        css      : css,
-        template : html
-    });
+    _extpro._$aop = function(_before,_after){
+        var _after = _after||_f,
+            _before = _before||_f,
+            _handler = this;
+        return function(){
+            var _event = {args:_r.slice.call(arguments,0)};
+            _before(_event);
+            if (!_event.stopped){
+                _event.value = _handler.apply(this,_event.args);
+                _after(_event);
+            }
+            return _event.value;
+        };
+    };
+    /**
+     * 绑定接口及参数，使其的调用对象保持一致
+     *
+     *  ```javascript
+     *  var scope = {a:0};
+     * 
+     *  var func = function(a,b){
+     *      // 第一个参数 ：1
+     *      console.log(a);
+     *      // 第二个参数 ： 2
+     *      consoel.log(b);
+     *      // 当前this.a ： 0
+     *      console.log(this.a);
+     *  };
+     * 
+     *  func._$bind(scope,"1")(2);
+     *  ```
+     *
+     * @method external:Function#_$bind
+     * @see    external:Function#_$bind2
+     * @param  {Object} arg0 - 需要保持一致的对象，null表示window对象，此参数外的其他参数作为绑定参数
+     * @return {Function}      返回绑定后的函数
+     */
+    _extpro._$bind = function() {
+        var _args = arguments,
+            _object = arguments[0],
+            _function = this;
+        return function(){
+            // not use slice for chrome 10 beta and Array.apply for android
+            var _argc = _r.slice.call(_args,1);
+            _r.push.apply(_argc,arguments);
+            return _function.apply(_object||null,_argc);
+        };
+    };
+    /**
+     * 绑定接口及参数，使其的调用对象保持一致，
+     * 该接口与_$bind接口的差别在于绑定时参数和调用时参数的顺序不一样，
+     * _$bind优先传入绑定时参数，_$bind2优先传入调用时参数
+     *
+     *  ```javascript
+     *  var scope = {a:0};
+     * 
+     *  var func = function(a,b){
+     *      // 第一个参数 ：2
+     *      console.log(a);
+     *      // 第二个参数 ： 1
+     *      consoel.log(b);
+     *      // 当前this.a ： 0
+     *      console.log(this.a);
+     *  };
+     * 
+     *  func._$bind(scope,"1")(2);
+     *  ```
+     *
+     * @method external:Function#_$bind2
+     * @see    external:Function#_$bind
+     * @param  {Object} arg0 - 需要保持一致的对象，null表示window对象，此参数外的其他参数作为绑定参数
+     * @return {Function}      返回绑定后的事件函数
+     */
+    _extpro._$bind2 = function() {
+        var _args = arguments,
+            _object = _r.shift.call(_args),
+            _function = this;
+        return function(){
+            _r.push.apply(arguments,_args);
+            return _function.apply(_object||null,arguments);
+        };
+    };
+    // for compatiable
+    var _extpro = String.prototype;
+    if (!_extpro.trim){
+         _extpro.trim = (function(){
+            var _reg = /(?:^\s+)|(?:\s+$)/g;
+            return function(){
+                return this.replace(_reg,'');
+            };
+         })();
+    }
+    if (!this.console){
+        this.console = {
+            log:_f,
+            error:_f
+        };
+    }
+
+    if (CMPT){
+        NEJ = this.NEJ||{};
+        // copy object properties
+        // only for nej compatiable
+        NEJ.copy = function(a,b){
+            a = a||{};
+            b = b||_o;
+            for(var x in b){
+                if (b.hasOwnProperty(x)){
+                    a[x] = b[x];
+                }
+            }
+            return a;
+        };
+        // NEJ namespace
+        NEJ = NEJ.copy(
+            NEJ,{
+                O:_o,R:_r,F:_f,
+                P:function(_namespace){
+                    if (!_namespace||!_namespace.length){
+                        return null;
+                    }
+                    var _package = window;
+                    for(var a=_namespace.split('.'),
+                            l=a.length,i=(a[0]=='window')?1:0;i<l;
+                            _package=_package[a[i]]=_package[a[i]]||{},i++);
+                    return  _package;
+                }
+            }
+        );
+        
+        return NEJ;
+    }
+
+    return _p;
 });
-
-
-
-
-NEJ.define(['a', 'b', 'c'], function() {
-    console.log('hello');
-})
-
-NEJ.define([], function() {
-    console.log('hello');
-})
-
-NEJ.define(['a', 'b', 'c'], function(a, b, c, d) {
-    console.log('hello');
-})
-
-NEJ.define(function() {
-    console.log('hello');
-})
-
-NEJ.define(function(a,b,c,d) {
-    console.log('hello');
-})
