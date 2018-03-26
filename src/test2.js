@@ -6,12 +6,6 @@
  *  @module   pool/component-base/src/base
  */
 NEJ.define([
-    'base/util',
-    'base/event',
-    'base/element',
-    'pool/cache-base/src/setting',
-    './util.js',
-    './directive.js',
     'css!pool/res-base/css/icons.css'
 ],function(
     u, v, e,

@@ -40,16 +40,14 @@ module.exports = function (babel) {
 
     const normalizeDep = function normalizeDep(dep) {
         function dropPrefix(dep) {
-            
-            const [prefix,rawDep] = dep.split('!');
+
+            const [prefix, rawDep] = dep.split('!');
 
             if (prefix === 'css' || prefix === 'json') {
                 txtDeps.push(dep);
             }
 
-            if (!rawDep) {
-                dep = prefix;
-            }
+            dep = rawDep ?  rawDep : prefix;
 
             return dep;
         }
