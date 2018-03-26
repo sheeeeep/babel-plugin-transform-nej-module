@@ -21,7 +21,7 @@ module.exports = function (babel) {
 
         cbContent = cbContent.filter( cbStatement => {
             if(t.isReturnStatement(cbStatement)) {
-                exportStatement = createExports(cbStatement.argument.name);
+                exportStatement = createExports(cbStatement.argument);
             }
             return !t.isReturnStatement(cbStatement);
         })
@@ -83,14 +83,18 @@ module.exports = function (babel) {
         return require;
     }
 
-    const createExports = function createExports(exportName) {
+    const createExports = function createExports(exportObj) {
+        if( typeof exportName == "string") {
+            exportObj = t.identifier(exportObj);
+        }
+
         return t.expressionStatement(t.assignmentExpression(
             '=',
             t.memberExpression(
                 t.identifier('module'),
                 t.identifier('exports')
             ),
-            t.identifier(exportName)
+            exportObj
         ));
     }
 
