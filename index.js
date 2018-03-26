@@ -6,10 +6,10 @@ module.exports = function (babel) {
 
 
     const getParamFromCallBack = function getParamFromCallBack(callback) {
-        let depsVal = [], cbContent = [], exportStatement;
+        let depsVal = [], cbContent = [], hasReturn = false;
         if (!t.isFunctionExpression(callback)) {
             return {
-                depsVal, cbContent, exportStatement
+                depsVal, cbContent, hasReturn
             }
         }
 
@@ -19,14 +19,11 @@ module.exports = function (babel) {
 
         cbContent = callback.body.body;
 
-        cbContent = cbContent.filter( cbStatement => {
-            if(t.isReturnStatement(cbStatement)) {
-                exportStatement = createExports(cbStatement.argument);
-            }
-            return !t.isReturnStatement(cbStatement);
+        hasReturn = cbContent.some( cbStatement => {            
+            return t.isReturnStatement(cbStatement);
         })
 
-        return { depsVal, cbContent, exportStatement };
+        return { depsVal, cbContent, hasReturn };
     }
 
     const normalizeDep = function normalizeDep(dep) {
@@ -98,6 +95,14 @@ module.exports = function (babel) {
         ));
     }
 
+    const createReturn = function createReturn(returnObj) {
+        if( typeof returnObj == "string") {
+            returnObj = t.identifier(returnObj);
+        }
+
+        return t.returnStatement(returnObj);
+    }
+
     const isNejModule = function isNejModule(callee) {
         function isDefine(callee) {
             return callee.name !== 'define';
@@ -139,17 +144,18 @@ module.exports = function (babel) {
                 }
 
                 
-                let { depsVal, cbContent, exportStatement = [] } = getParamFromCallBack(callback);
+                let { depsVal, cbContent, hasReturn = false } = getParamFromCallBack(callback);
 
                 const requires = deps.map((dep, idx) => {
                     return createRequire(depsVal[idx], dep); // var depsVal[idx] = require('dep');
                 })
 
                 const injectStatements = [];
+                let returnStatement = [];
                 const injectParams = depsVal.splice(requires.length);
                 injectParams.forEach((injectParam, idx) => {
-                    if (idx === 0) {
-                        exportStatement = createExports(injectParam);
+                    if (idx === 0 && !hasReturn) {
+                        returnStatement = createReturn(injectParam);
                         injectStatements.push(t.variableDeclaration('var', [
                             t.variableDeclarator(t.identifier(injectParam), t.objectExpression([]))
                         ]));
@@ -171,7 +177,7 @@ module.exports = function (babel) {
                     }
                 })
 
-                const content = requires.concat(injectStatements).concat(cbContent).concat(exportStatement);
+                const content = requires.concat(injectStatements).concat(cbContent).concat(returnStatement);
 
                 const rootFunc = t.expressionStatement(
                     t.callExpression(
