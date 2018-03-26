@@ -2,8 +2,8 @@ let t;
 
 module.exports = function (babel) {
     t = babel.types;
-    var randomValCount = 0;
-
+    let randomValCount = 0;
+    let txtDeps = [];
 
     const getParamFromCallBack = function getParamFromCallBack(callback) {
         let depsVal = [],
@@ -39,9 +39,18 @@ module.exports = function (babel) {
     }
 
     const normalizeDep = function normalizeDep(dep) {
-
         function dropPrefix(dep) {
-            dep = dep.split('!')[1] ? dep.split('!')[1] : dep;
+            
+            const [prefix,rawDep] = dep.split('!');
+
+            if (prefix === 'css' || prefix === 'json') {
+                txtDeps.push(dep);
+            }
+
+            if (!rawDep) {
+                dep = prefix;
+            }
+
             return dep;
         }
         function dropJSExt() {
@@ -156,7 +165,7 @@ module.exports = function (babel) {
                 }
 
 
-                let { depsVal, cbContent, exportStatement = []} = getParamFromCallBack(callback);
+                let { depsVal, cbContent, exportStatement = [] } = getParamFromCallBack(callback);
 
                 const requires = deps.map((dep, idx) => {
                     return createRequire(depsVal[idx], dep); // var depsVal[idx] = require('dep');
@@ -180,7 +189,7 @@ module.exports = function (babel) {
                     if (idx === 2) {
                         injectStatements.push(t.variableDeclaration('var', [
                             t.variableDeclarator(t.identifier(injectParam), t.functionExpression(null, [], t.blockStatement([])))
-                            
+
                         ]));
                     }
                     if (idx === 3) {
@@ -190,7 +199,16 @@ module.exports = function (babel) {
                     }
                 })
 
-                const content = requires.concat(injectStatements).concat(cbContent).concat(exportStatement);
+                const txtModuleInitStatements = [];
+                deps.forEach((dep, idx) => {
+                    if (txtDeps.indexOf(dep) > -1) {
+                        const val = depsVal[idx];
+                        txtModuleInitStatements.push(
+                            t.expressionStatement(t.assignmentExpression('=', t.identifier(val), t.stringLiteral(''))))
+                    }
+                })
+
+                const content = requires.concat(txtModuleInitStatements).concat(injectStatements).concat(cbContent).concat(exportStatement);
 
                 const rootFunc = t.expressionStatement(
                     t.callExpression(

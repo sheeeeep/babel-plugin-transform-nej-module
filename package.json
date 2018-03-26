@@ -1,6 +1,6 @@
 {
     "name": "babel-plugin-transform-nej-module",
-    "version": "2.0.20",
+    "version": "2.0.21",
     "description": "transform nej module to require",
     "main": "index.js",
     "scripts": {
