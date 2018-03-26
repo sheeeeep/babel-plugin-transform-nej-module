@@ -135,7 +135,7 @@ module.exports = function (babel) {
                 }
 
                 
-                let { depsVal, cbContent, exportStatement } = getParamFromCallBack(callback);
+                let { depsVal, cbContent, exportStatement = [] } = getParamFromCallBack(callback);
 
                 const requires = deps.map((dep, idx) => {
                     return createRequire(depsVal[idx], dep); // var depsVal[idx] = require('dep');
