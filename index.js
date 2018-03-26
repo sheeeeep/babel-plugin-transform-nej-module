@@ -6,10 +6,14 @@ module.exports = function (babel) {
 
 
     const getParamFromCallBack = function getParamFromCallBack(callback) {
-        let depsVal = [], cbContent = [], hasReturn = false;
+        let depsVal = [],
+            cbContent = [],
+            hasReturn = false,
+            exportStatement = []
+            ;
         if (!t.isFunctionExpression(callback)) {
             return {
-                depsVal, cbContent, hasReturn
+                depsVal, cbContent, exportStatement
             }
         }
 
@@ -19,11 +23,19 @@ module.exports = function (babel) {
 
         cbContent = callback.body.body;
 
-        hasReturn = cbContent.some( cbStatement => {            
-            return t.isReturnStatement(cbStatement);
+        // hasReturn = cbContent.some( cbStatement => {            
+        //     return t.isReturnStatement(cbStatement);
+        // })
+
+        cbContent = cbContent.filter(cbStatement => {
+            if (t.isReturnStatement(cbStatement)) {
+                exportStatement = createExports(cbStatement.argument);
+            }
+            return !t.isReturnStatement(cbStatement);
         })
 
-        return { depsVal, cbContent, hasReturn };
+
+        return { depsVal, cbContent, exportStatement };
     }
 
     const normalizeDep = function normalizeDep(dep) {
@@ -81,7 +93,7 @@ module.exports = function (babel) {
     }
 
     const createExports = function createExports(exportObj) {
-        if( typeof exportObj == "string") {
+        if (typeof exportObj == "string") {
             exportObj = t.identifier(exportObj);
         }
 
@@ -96,7 +108,7 @@ module.exports = function (babel) {
     }
 
     const createReturn = function createReturn(returnObj) {
-        if( typeof returnObj == "string") {
+        if (typeof returnObj == "string") {
             returnObj = t.identifier(returnObj);
         }
 
@@ -133,7 +145,7 @@ module.exports = function (babel) {
                 }
 
                 let callback, deps;
-                if(args.length === 1) {
+                if (args.length === 1) {
                     callback = args[0];
                     deps = [];
                 } else {
@@ -143,19 +155,19 @@ module.exports = function (babel) {
                     });
                 }
 
-                
-                let { depsVal, cbContent, hasReturn = false } = getParamFromCallBack(callback);
+
+                let { depsVal, cbContent, exportStatement = []} = getParamFromCallBack(callback);
 
                 const requires = deps.map((dep, idx) => {
                     return createRequire(depsVal[idx], dep); // var depsVal[idx] = require('dep');
                 })
 
                 const injectStatements = [];
-                let returnStatement = [];
+                // let returnStatement = [];
                 const injectParams = depsVal.splice(requires.length);
                 injectParams.forEach((injectParam, idx) => {
-                    if (idx === 0 && !hasReturn) {
-                        returnStatement = createReturn(injectParam);
+                    if (idx === 0) {
+                        if (!exportStatement.length) { exportStatement = createExports(injectParam); }
                         injectStatements.push(t.variableDeclaration('var', [
                             t.variableDeclarator(t.identifier(injectParam), t.objectExpression([]))
                         ]));
@@ -167,17 +179,18 @@ module.exports = function (babel) {
                     }
                     if (idx === 2) {
                         injectStatements.push(t.variableDeclaration('var', [
-                            t.variableDeclarator(t.identifier(injectParam), t.arrayExpression([]))
+                            t.variableDeclarator(t.identifier(injectParam), t.functionExpression(null, [], t.blockStatement([])))
+                            
                         ]));
                     }
                     if (idx === 3) {
                         injectStatements.push(t.variableDeclaration('var', [
-                            t.variableDeclarator(t.identifier(injectParam), t.functionExpression(null, [], t.blockStatement([])))
+                            t.variableDeclarator(t.identifier(injectParam), t.arrayExpression([]))
                         ]));
                     }
                 })
 
-                const content = requires.concat(injectStatements).concat(cbContent).concat(returnStatement);
+                const content = requires.concat(injectStatements).concat(cbContent).concat(exportStatement);
 
                 const rootFunc = t.expressionStatement(
                     t.callExpression(
