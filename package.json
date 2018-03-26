@@ -1,24 +1,30 @@
 {
-  "name": "babel-plugin-transform-nej-module",
-  "version": "2.0.8",
-  "description": "transform nej module to require",
-  "main": "src/index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/sheeeeep/babel-plugin-transform-nej-module.git"
-  },
-  "keywords": [
-    "nej",
-    "module",
-    "webpack"
-  ],
-  "author": "CaoY",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/sheeeeep/babel-plugin-transform-nej-module/issues"
-  },
-  "homepage": "https://github.com/sheeeeep/babel-plugin-transform-nej-module#readme"
+    "name": "babel-plugin-transform-nej-module",
+    "version": "2.0.8",
+    "description": "transform nej module to require",
+    "main": "index.js",
+    "scripts": {
+        "build": "babel src -d dist --source-maps"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sheeeeep/babel-plugin-transform-nej-module.git"
+    },
+    "keywords": [
+        "nej",
+        "module",
+        "webpack"
+    ],
+    "author": "CaoY",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/sheeeeep/babel-plugin-transform-nej-module/issues"
+    },
+    "homepage": "https://github.com/sheeeeep/babel-plugin-transform-nej-module#readme",
+    "dependencies": {
+        "babel-core": "^6.26.0"
+    },
+    "devDependencies": {
+        "babel-preset-env": "^1.6.1"
+    }
 }

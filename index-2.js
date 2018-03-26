@@ -1,13 +1,20 @@
 let t;
+let path, state;
 
 module.exports = function (babel) {
     t = babel.types;
     return {
         visitor: {
-            CallExpression(path, state) {
+            CallExpression(_path, _state) {
+                path = _path;
+                state = _state;
                 const callee = path.node.callee,
                     args = path.node.arguments;
                 let _callee, _arguments;
+
+                state.opts = {
+                    mode: 'web'
+                }
 
                 if (!callee) return;
 
@@ -16,19 +23,13 @@ module.exports = function (babel) {
                             callee.property.name === 'define') :
                         false
                     ))) {
-                    _callee = normalizeDefine();
 
-                    path.node.callee = _callee;
+                    path.node.callee = normalizeDefine();
 
-                    if (t.isArrayExpression(path.node.arguments[0])) {
-                        path.node.arguments[0] = normalizeUrl(args[0]);
-                        path.get('arguments.1.body').unshiftContainer('body', injectParams());
+                    path.node.arguments[0] = normalizeUrls(path.node.arguments[0]);
+                    if (path.node.arguments[1]) {
+                        normalizeCb(path.node.arguments[1]);
                     }
-
-                    if (t.isFunctionExpression(path.node.arguments[0])) {
-                        path.get('arguments.0.body').unshiftContainer('body', injectParams());
-                    }
-
                 }
             }
         }
@@ -39,11 +40,50 @@ const normalizeDefine = function () {
     return t.identifier('define');
 }
 
-const normalizeUrl = function (arg) {
-    const urls = arg.elements;
+const normalizeUrls = function (target) {
+    if (t.isArrayExpression(target)) {
+        return normalizeUrl(target.elements);
+    }
 
-    const _urls = urls.map(itm => spotBrace(spotPlatform(spotExt(itm.value))));
+    if (t.isStringLiteral(target)) {
+        return normalizeUrl([target]);
+    }
+
+    if (t.isFunctionExpression(target)) {
+        normalizeCb(target);
+        return target;
+    }
+
+    if (t.isIdentifier(target)) {
+        //target = normalizeUrls(getVal(target));
+    }
+
+    return target;
+}
+
+const normalizeCb = function (target) {
+    const _path = `arguments.${path.node.arguments.length-1}.body`;
+
+    if (t.isIdentifier(target)) {
+        //target = normalizeCb(getVal(target));
+    } else {
+        path.get(_path).unshiftContainer('body', injectParams());
+    }
+
+}
+
+const normalizeUrl = function (urls) {
+    const _urls = urls.map(itm => spotAlias(itm.value || itm));
     return t.arrayExpression(_urls);
+}
+
+const spotAlias = function (url) {
+    let _url = spotExt(url);
+    _url = spotPlatform(_url);
+    _url = spotBraceKey(_url);
+    _url = spotBrace(_url);
+
+    return _url;
 }
 
 const spotExt = function (url) {
@@ -61,8 +101,8 @@ const spotPlatform = function (url) {
         [leftPos, rightPos] = [_url.indexOf('{'), _url.indexOf('}')];
 
     if (leftPos >= 0 && rightPos >= 0) {
-        const key = _url.slice(leftPos+1, rightPos).join('');
-      
+        const key = _url.slice(leftPos + 1, rightPos).join('');
+
         if (key === 'platform') {
             _url.unshift('./');
         }
@@ -71,12 +111,26 @@ const spotPlatform = function (url) {
     return _url.join('');
 }
 
+const spotBraceKey = function (url) {
+    let _url = url.split(''),
+        [leftPos, rightPos] = [_url.indexOf('{'), _url.indexOf('}')];
+
+    if (leftPos >= 0 && rightPos >= 0) {
+        const _key = _url.slice(leftPos + 1, rightPos).join(''),
+            _val = state.opts[_key] || _key;
+
+        url.replace(_key, _val);
+    }
+
+    return url;
+}
+
 const spotBrace = function (url) {
     let _url = url.split(''),
         [leftPos, rightPos] = [_url.indexOf('{'), _url.indexOf('}')];
 
     if (rightPos >= 0) {
-        if (_url[rightPos+1] !== '/') {
+        if (_url[rightPos + 1] !== '/') {
             _url.splice(rightPos, 1, '/');
         } else {
             _url.splice(rightPos, 1);
