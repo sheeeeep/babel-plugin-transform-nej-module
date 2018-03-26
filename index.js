@@ -145,7 +145,10 @@ module.exports = function (babel) {
                 const injectParams = depsVal.splice(requires.length);
                 injectParams.forEach((injectParam, idx) => {
                     if (idx === 0) {
-                        exportStatement = createExports(injectParam)
+                        exportStatement = createExports(injectParam);
+                        injectStatements.push(t.variableDeclaration('var', [
+                            t.variableDeclarator(t.identifier(injectParam), t.objectExpression([]))
+                        ]));
                     }
                     if (idx === 1) {
                         injectStatements.push(t.variableDeclaration('var', [

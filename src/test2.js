@@ -1,5 +1,5 @@
 
-NEJ.define([a, b, c], function() {
+NEJ.define(['a', 'b', 'c'], function() {
     console.log('hello');
 })
 
