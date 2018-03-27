@@ -1,7 +1,7 @@
 define(['text!./questionItem.html',
        '{pro}/ui/baseui/base.js',
-       '{pro}ui/question/type/choice/choice',
-       'pro/ui/question/type/subject/subject'],
+       '{pro}ui/question/{mode}/choice/choice',
+       'pro/ui/question/mode/subject/subject'],
        function(template,
                 BaseUI){
               

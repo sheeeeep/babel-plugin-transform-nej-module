@@ -22,7 +22,7 @@ fs.readFile(fileName, function (err, data) {
                 }
             }]
         ],
-        plugins: [[plugin]]
+        plugins: [[plugin, {mode: 'web'}]]
     });
 
     // print the generated code to screen

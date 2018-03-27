@@ -23,10 +23,6 @@ module.exports = function (babel) {
 
         cbContent = callback.body.body;
 
-        // hasReturn = cbContent.some( cbStatement => {            
-        //     return t.isReturnStatement(cbStatement);
-        // })
-
         cbContent = cbContent.filter(cbStatement => {
             if (t.isReturnStatement(cbStatement)) {
                 exportStatement = createExports(cbStatement.argument);
@@ -38,7 +34,7 @@ module.exports = function (babel) {
         return { depsVal, cbContent, exportStatement };
     }
 
-    const normalizeDep = function normalizeDep(dep) {
+    const normalizeDep = function normalizeDep(dep, opts) {
         function dropPrefix(dep) {
 
             const [prefix, rawDep] = dep.split('!');
@@ -60,7 +56,11 @@ module.exports = function (babel) {
             return dep;
         }
 
-        function dropBracket() {
+        function assignMode(dep) {
+            return dep.replace('{mode}', opts.mode);
+        }
+
+        function dropBracket(dep) {
             const leftPos = dep.indexOf('{'),
                 rightPos = dep.indexOf('}');
 
@@ -78,13 +78,14 @@ module.exports = function (babel) {
 
         dep = dropPrefix(dep);
         dep = dropJSExt(dep);
+        dep = assignMode(dep);
         dep = dropBracket(dep);
 
         return dep;
     }
 
-    const createRequire = function createRequire(val, dep) {
-        dep = normalizeDep(dep);
+    const createRequire = function createRequire(val, dep, opts) {
+        dep = normalizeDep(dep, opts);
 
         if (!val) {
             val = `randomVal${++randomValCount}`;
@@ -138,7 +139,8 @@ module.exports = function (babel) {
 
     return {
         visitor: {
-            CallExpression(path) {
+            CallExpression(path ,state) {
+                const opts = state.opts;
                 const mainContent = path.node;
                 const callee = mainContent.callee,
                     args = mainContent.arguments;
@@ -166,7 +168,7 @@ module.exports = function (babel) {
                 let { depsVal, cbContent, exportStatement = [] } = getParamFromCallBack(callback);
 
                 const requires = deps.map((dep, idx) => {
-                    return createRequire(depsVal[idx], dep); // var depsVal[idx] = require('dep');
+                    return createRequire(depsVal[idx], dep, opts); // var depsVal[idx] = require('dep');
                 })
 
                 const injectStatements = [];
