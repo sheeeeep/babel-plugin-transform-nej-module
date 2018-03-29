@@ -1,6 +1,6 @@
 {
     "name": "babel-plugin-transform-nej-module",
-    "version": "2.0.22",
+    "version": "2.0.23",
     "description": "transform nej module to require",
     "main": "index.js",
     "scripts": {
@@ -22,9 +22,12 @@
     },
     "homepage": "https://github.com/sheeeeep/babel-plugin-transform-nej-module#readme",
     "dependencies": {
-        "babel-core": "^6.26.0"
+        "babel-core": "^6.26.0",
+        "babel-generator": "^6.26.1",
+        "babel-types": "^6.26.0"
     },
     "devDependencies": {
-        "babel-preset-env": "^1.6.1"
+        "babel-preset-env": "^1.6.1",
+        "babel-template": "^6.26.0"
     }
 }
