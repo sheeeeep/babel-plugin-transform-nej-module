@@ -41,12 +41,33 @@ module.exports = function (babel) {
                             let funcName;
                             try {
                                 if (funcParent && funcParent.node && funcParent.node.id && (funcParent.node.id.name === 'nejModule')) {
-                                    let ret = path.node.argument;                                    
+                                    let ret = path.node.argument;
                                     const exportStat = buildUtil.buildExport(ret);
                                     path.replaceWith(exportStat);
                                     hasReturn = true;
                                 }
                             } catch (e) {
+                            }
+                        }
+                    }
+
+                    const outputResultVisitor = {
+                        Identifier(path) {
+                            const funcParent = path.getFunctionParent();
+                            let funcName;
+                            try {
+                                if (funcParent && funcParent.node && funcParent.node.id && (funcParent.node.id.name === 'nejModule')) {                                    
+                                    if (path.node.name === this.outputResult) {
+                                        path.node.name = 'exports';
+                                    }
+                                }
+                            } catch (e) {
+                            }
+                        },
+                        AssignmentExpression(path) {
+                            const node = path.node;
+                            if (node.operator === '=' && node.left && node.left.object && node.left.property && node.left.object.name === 'module' && node.left.property.name === 'exports' && node.right && node.right.name === this.outputResult) {
+                                node.right.name = 'exports';
                             }
                         }
                     }
@@ -74,12 +95,17 @@ module.exports = function (babel) {
                     const depsVal = cb.node.params.map(param => {
                         return param.name;
                     });
-                    const { requireStats, txtModuleInitStats, injectParamStats, outputResultExportStat } = brokenDeps(deps, depsVal, opts)
+                    const { requireStats, txtModuleInitStats, injectParamStats, outputResult } = brokenDeps(deps, depsVal, opts)
+
+                    if(outputResult !== 'exports') {
+                        cb.traverse(outputResultVisitor, { outputResult });
+                    }
 
                     let stats = requireStats.concat(txtModuleInitStats).concat(injectParamStats).concat(cbStats)
-                    if (!hasReturn) {
-                        stats = stats.concat(outputResultExportStat);
-                    }
+                    
+                    // if (!hasReturn) {
+                    //     stats = stats.concat(outputResultExportStat);
+                    // }
 
                     const rootFunc = TEMPLATE.IEFFStat({
                         STATEMENTS: stats

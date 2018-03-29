@@ -14,12 +14,17 @@ const buildRequires = function (requires) {
 };
 const buildInjectParams = function (arr) {
     const pro = arr[0], o = arr[1], f = arr[2], r = arr[3];
-    const stats = [];
+    let stats = [];
 
     if (pro) {
-        stats.push(TEMPLATE.emptyObjectStat({
-            PARAM: t.identifier(pro)
-        }));
+        if (pro !== 'exports') {
+            stats.push(
+                TEMPLATE.outputResultInitStat({
+                    PARAM: t.identifier(pro)
+                })
+            );
+        }
+
     }
 
     if (o) {

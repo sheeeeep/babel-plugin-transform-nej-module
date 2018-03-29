@@ -84,11 +84,11 @@ module.exports = function (deps, depsVal, opts) {
     const { txtModuleParam, requires } = normalizeDeps(nejDeps, opts); //json、text、css方式引入的依赖，都按照nej的模式处理为空字符串
 
     const injectParams = depsVal.splice(deps.length);
-    let outputResultExportStat = [];
-    let injectParamStats = [];
+    // let outputResultExportStat = [];
+    let injectParamStats = [], outputResult;
     if (injectParams.length) {
-        const outputResult = t.identifier(injectParams[0]);
-        outputResultExportStat = buildUtil.buildExport(outputResult);
+        outputResult = injectParams[0];
+        // outputResultExportStat = buildUtil.buildExport(outputResult);
         injectParamStats = buildUtil.buildInjectParams(injectParams);
     }
 
@@ -96,5 +96,5 @@ module.exports = function (deps, depsVal, opts) {
     const txtModuleInitStats = buildUtil.buildEmptyStrings(txtModuleParam);
     const requireStats = buildUtil.buildRequires(requires);
 
-    return { requireStats, txtModuleInitStats, injectParamStats, outputResultExportStat };
+    return { requireStats, txtModuleInitStats, injectParamStats, outputResult };
 }

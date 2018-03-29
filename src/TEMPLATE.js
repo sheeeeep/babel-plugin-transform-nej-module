@@ -23,5 +23,8 @@ module.exports = {
     `),
     exportStat: template(`
         module.exports = PARAM
+    `),
+    outputResultInitStat: template(`
+        var PARAM = exports;
     `)
 }
