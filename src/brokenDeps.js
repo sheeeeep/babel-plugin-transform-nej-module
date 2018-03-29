@@ -73,7 +73,7 @@ const normalizeDeps = function (nejDeps, opts) {
 module.exports = function (deps, depsVal, opts) {
     const nejDeps = {};
     deps.forEach((dep, idx) => {
-        nejDeps[dep] = depsVal[idx];
+        nejDeps[dep] = depsVal[idx] || `randomVal${idx}`;
     });
 
     const injectParams = depsVal.splice(deps.length);

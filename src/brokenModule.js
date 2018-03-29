@@ -9,10 +9,14 @@ module.exports = function ([deps, cb]) {
         deps = deps.node;
     }
 
-    if (deps && deps.elements && deps.elements.length) {
-        deps = deps.elements.map(ele => {
-            return ele.value;
-        });
+    if (deps && deps.elements) {
+        if (deps.elements.length) {
+            deps = deps.elements.map(ele => {
+                return ele.value;
+            });
+        } else {
+            deps = [];
+        }
     }
 
     if (t.isIdentifier(cb)) {
