@@ -11,7 +11,11 @@ const normalizeDeps = function (nejDeps, opts) {
     function dropPrefix(dep, nejDep) {
         const [prefix, rawDep] = dep.split('!');
 
-        if (prefix === 'css' || prefix === 'json' || prefix === 'text') {
+        if (prefix === 'css') {
+            txtModuleParam.push(nejDeps[nejDep]);
+        }
+
+        if (prefix === 'text' && rawDep.indexOf('.css') > -1) {
             txtModuleParam.push(nejDeps[nejDep]);
         }
 
