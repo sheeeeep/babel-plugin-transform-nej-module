@@ -13,8 +13,14 @@ const buildRequires = function (requires) {
     return stats;
 };
 const buildInjectParams = function (arr) {
-    const o = arr[0], f = arr[1], r = arr[2];
+    const pro = arr[0], o = arr[1], f = arr[2], r = arr[3];
     const stats = [];
+
+    if(pro) {
+        stats.push(TEMPLATE.emptyObjectStat({
+            PARAM: t.identifier(pro)
+        }));
+    }
 
     if (o) {
         stats.push(TEMPLATE.emptyObjectStat({

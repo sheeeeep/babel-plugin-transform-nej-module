@@ -77,7 +77,7 @@ module.exports = function (deps, depsVal, opts) {
     });
 
     const injectParams = depsVal.splice(deps.length);
-    const outputResult = injectParams.shift();
+    const outputResult = injectParams[0];
     const { txtModuleParam, requires } = normalizeDeps(nejDeps, opts); //json、text、css方式引入的依赖，都按照nej的模式处理为空字符串
 
     const outputResultExportStat = buildUtil.buildExport(outputResult);
