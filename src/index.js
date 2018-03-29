@@ -41,7 +41,8 @@ module.exports = function (babel) {
                             let funcName;
                             try {
                                 if (funcParent && funcParent.node && funcParent.node.id && (funcParent.node.id.name === 'nejModule')) {
-                                    path.replaceWith(buildUtil.buildExport(path.node.argument.name));
+                                    const exportStat = buildUtil.buildExport(path.node.argument.name);
+                                    path.replaceWith(exportStat);
                                     hasReturn = true;
                                 }
                             } catch (e) {
@@ -63,19 +64,19 @@ module.exports = function (babel) {
                         } else {
                             return;
                         }
-                    } 
-                    
+                    }
+
                     cb.node.id = t.identifier('nejModule'); // return语句和其对应的函数确认眼神的信号
                     cb.traverse(returnVisitor);
 
-                    const cbStats = cb.node.body;
+                    const cbStats = cb.node.body.body;
                     const depsVal = cb.node.params.map(param => {
                         return param.name;
                     });
                     const { requireStats, txtModuleInitStats, injectParamStats, outputResultExportStat } = brokenDeps(deps, depsVal, opts)
 
                     let stats = requireStats.concat(txtModuleInitStats).concat(injectParamStats).concat(cbStats)
-                    if(!hasReturn) {
+                    if (!hasReturn) {
                         stats = stats.concat(outputResultExportStat);
                     }
 
