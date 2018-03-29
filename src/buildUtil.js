@@ -3,8 +3,8 @@ const t = require('babel-types');
 
 const buildRequires = function (requires) {
     const stats = [];
-    Object.keys(requires).forEach( source => {
-        stats.push( TEMPLATE.requireStat({
+    Object.keys(requires).forEach(source => {
+        stats.push(TEMPLATE.requireStat({
             IMPORT_NAME: t.identifier(requires[source]),
             SOURCE: t.stringLiteral(source)
         }))
@@ -16,7 +16,7 @@ const buildInjectParams = function (arr) {
     const pro = arr[0], o = arr[1], f = arr[2], r = arr[3];
     const stats = [];
 
-    if(pro) {
+    if (pro) {
         stats.push(TEMPLATE.emptyObjectStat({
             PARAM: t.identifier(pro)
         }));
@@ -53,11 +53,22 @@ const buildEmptyStrings = function (arr) {
     return stats;
 }
 
-const buildExport = function(param) {
-    if (typeof param == "string") {
-        param = t.identifier(param);
+const buildExport = function (param) {
+    if (!param) {
+        param = t.objectExpression([]);
     }
+    const type = typeof param;
 
+    switch (type) {
+        case 'string':
+            param = t.stringLiteral(param);
+            break;
+        case 'number':
+            param = t.numericLiteral(param);
+            break;
+        default:
+            break;
+    }
     return TEMPLATE.exportStat({
         PARAM: param
     })

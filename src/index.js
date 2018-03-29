@@ -41,7 +41,8 @@ module.exports = function (babel) {
                             let funcName;
                             try {
                                 if (funcParent && funcParent.node && funcParent.node.id && (funcParent.node.id.name === 'nejModule')) {
-                                    const exportStat = buildUtil.buildExport(path.node.argument.name);
+                                    let ret = path.node.argument;                                    
+                                    const exportStat = buildUtil.buildExport(ret);
                                     path.replaceWith(exportStat);
                                     hasReturn = true;
                                 }
