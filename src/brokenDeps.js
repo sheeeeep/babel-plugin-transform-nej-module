@@ -1,6 +1,7 @@
 
 const TEMPLATE = require('./TEMPLATE');
 const buildUtil = require('./buildUtil');
+const t = require('babel-types');
 
 const normalizeDeps = function (nejDeps, opts) {
     const deps = Object.keys(nejDeps);
@@ -76,12 +77,18 @@ module.exports = function (deps, depsVal, opts) {
         nejDeps[dep] = depsVal[idx] || `randomVal${idx}`;
     });
 
-    const injectParams = depsVal.splice(deps.length);
-    const outputResult = injectParams[0];
     const { txtModuleParam, requires } = normalizeDeps(nejDeps, opts); //json、text、css方式引入的依赖，都按照nej的模式处理为空字符串
 
-    const outputResultExportStat = buildUtil.buildExport(outputResult);
-    const injectParamStats = buildUtil.buildInjectParams(injectParams);
+    const injectParams = depsVal.splice(deps.length);
+    let outputResultExportStat = [];
+    let injectParamStats = [];
+    if (injectParams.length) {
+        const outputResult = t.identifier(injectParams[0]);
+        outputResultExportStat = buildUtil.buildExport(outputResult);
+        injectParamStats = buildUtil.buildInjectParams(injectParams);
+    }
+
+
     const txtModuleInitStats = buildUtil.buildEmptyStrings(txtModuleParam);
     const requireStats = buildUtil.buildRequires(requires);
 
