@@ -29,7 +29,6 @@
     }
 }
 ```
-4. 引入额外的[`nej-polyfill`](https://github.com/sheeeeep/babel-plugin-transform-nej-module/blob/master/nej-polyfill.js)
 
 ## 使用示例
 
@@ -41,10 +40,10 @@ const resolve =path.resolve;
 module.exports = {
     resolve: {
         alias: {
-            'pro': path.resolve(__dirname, 'src/javascript'),
-            'pool': path.resolve(__dirname, 'lib'),
-            'base': path.resolve(__dirname, 'lib/nej/src/base'),
-            'platform': path.resolve(__dirname, 'lib/nej/src/base/platform')
+            'base': resolve('lib/nej/src/base'),
+            'lib': resolve('lib/nej/src'),
+            'ui': resolve('lib/nej/src/ui'),
+            'util': resolve('lib/nej/src/util')
         }
     },
     module: {
@@ -79,5 +78,4 @@ module.exports = {
 }
 ```
 
-
-
+## 处理方法(待完成)
