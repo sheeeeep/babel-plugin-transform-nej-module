@@ -41,9 +41,14 @@ module.exports = function (babel) {
                             let funcName;
                             try {
                                 if (funcParent && funcParent.node && funcParent.node.id && (funcParent.node.id.name === 'nejModule')) {
+                                    const preSibling = path.key > 0 ? path.getSibling(path.key-1).node : null;
+                                    if(preSibling && preSibling.expression && preSibling.expression.left && preSibling.expression.left.object && preSibling.expression.left.property && preSibling.expression.left.object.name === 'module' && preSibling.node.expression.left.property.name === 'exports') {
+                                        return;
+                                    }
+                                    
                                     let ret = path.node.argument;
                                     const exportStat = buildUtil.buildExport(ret);
-                                    path.replaceWith(exportStat);
+                                    path.replaceWithMultiple(exportStat);
                                     hasReturn = true;
                                 }
                             } catch (e) {

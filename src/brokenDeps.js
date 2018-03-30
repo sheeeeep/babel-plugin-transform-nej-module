@@ -88,7 +88,6 @@ module.exports = function (deps, depsVal, opts) {
     let injectParamStats = [], outputResult;
     if (injectParams.length) {
         outputResult = injectParams[0];
-        // outputResultExportStat = buildUtil.buildExport(outputResult);
         injectParamStats = buildUtil.buildInjectParams(injectParams);
     }
 

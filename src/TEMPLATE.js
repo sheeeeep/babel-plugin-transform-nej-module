@@ -22,7 +22,8 @@ module.exports = {
         }).call(window)
     `),
     exportStat: template(`
-        module.exports = PARAM
+        module.exports = PARAM;
+        return;
     `),
     outputResultInitStat: template(`
         var PARAM = exports;
