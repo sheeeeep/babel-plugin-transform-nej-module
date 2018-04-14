@@ -108,10 +108,6 @@ module.exports = function (babel) {
 
                     let stats = requireStats.concat(txtModuleInitStats).concat(injectParamStats).concat(cbStats)
                     
-                    // if (!hasReturn) {
-                    //     stats = stats.concat(outputResultExportStat);
-                    // }
-
                     const rootFunc = TEMPLATE.IEFFStat({
                         STATEMENTS: stats
                     });
