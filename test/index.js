@@ -38,7 +38,16 @@ describe('module test', () => {
             babelOps
         );
     });
+
+    it('test variable callback', () => {
+        return assertTransform(
+            path.join(__dirname, './module/variableCallback.actual.js'),
+            path.join(__dirname, './module/variableCallback.expected.js'),
+            babelOps
+        );
+    })
 });
+      
 
 describe('deps test', () => {
     it('test nej module without deps', () => {
@@ -81,3 +90,5 @@ describe('deps test', () => {
         );
     });
 })
+
+
