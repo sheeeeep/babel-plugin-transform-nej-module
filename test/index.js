@@ -65,35 +65,19 @@ describe('deps test', () => {
         );
     });
 
-    // it('test deps with injected param', () => {
-    //     return assertTransform(
-    //         path.join(__dirname, './deps/injectedParam.actual.js'),
-    //         path.join(__dirname, './deps/injectedParam.expected.js'),
-    //         babelOps
-    //     );
-    // });
+    it('test deps with injected param', () => {
+        return assertTransform(
+            path.join(__dirname, './deps/injectedParam.actual.js'),
+            path.join(__dirname, './deps/injectedParam.expected.js'),
+            babelOps
+        );
+    });
 
-    // it('test deps with output result space', () => {
-    //     return assertTransform(
-    //         path.join(__dirname, './deps/outputResultSpace.actual.js'),
-    //         path.join(__dirname, './deps/outputResultSpace.expected.js'),
-    //         babelOps
-    //     );
-    // });
-
-    // it('test deps with mode', () => {
-    //     return assertTransform(
-    //         path.join(__dirname, './deps/mode.actual.js'),
-    //         path.join(__dirname, './deps/mode.expected.js'),
-    //         babelOps
-    //     );
-    // });
-
-    // it('test deps with brace', () => {
-    //     return assertTransform(
-    //         path.join(__dirname, './module/brace.actual.js'),
-    //         path.join(__dirname, './module/brace.expected.js'),
-    //         babelOps
-    //     );
-    // });
+    it('test deps with mode', () => {
+        return assertTransform(
+            path.join(__dirname, './deps/mode.actual.js'),
+            path.join(__dirname, './deps/mode.expected.js'),
+            babelOps
+        );
+    });
 })
