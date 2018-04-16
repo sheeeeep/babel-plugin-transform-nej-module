@@ -91,4 +91,38 @@ describe('deps test', () => {
     });
 })
 
+describe('return test', () => {
+    it('test return without outputResult', () => {
+        return assertTransform(
+            path.join(__dirname, './return/return.actual.js'),
+            path.join(__dirname, './return/return.expected.js'),
+            babelOps
+        );
+    });
+
+    it('test outputResult without return', () => {
+        return assertTransform(
+            path.join(__dirname, './return/outputResult.actual.js'),
+            path.join(__dirname, './return/outputResult.expected.js'),
+            babelOps
+        );
+    });
+
+    it('test outputResult and return', () => {
+        return assertTransform(
+            path.join(__dirname, './return/returnAndOR.actual.js'),
+            path.join(__dirname, './return/returnAndOR.expected.js'),
+            babelOps
+        );
+    });
+
+    it('test deep outputResult and return', () => {
+        return assertTransform(
+            path.join(__dirname, './return/deepReturnAndOR.actual.js'),
+            path.join(__dirname, './return/deepReturnAndOR.expected.js'),
+            babelOps
+        );
+    });
+})
+
 
