@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "启动程序",
             "program": "${workspaceFolder}/run.js",
-            "args": ["data/test.js"]
+            "args": ["test/deps/prefix.actual.js"]
         }
     ]
 }
