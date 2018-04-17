@@ -125,4 +125,30 @@ describe('return test', () => {
     });
 })
 
+describe('complex files test', () => {
+    it('test global', () => {
+        return assertTransform(
+            path.join(__dirname, './complexFiles/global.actual.js'),
+            path.join(__dirname, './complexFiles/global.expected.js'),
+            babelOps
+        );
+    });
+
+    it('test event', () => {
+        return assertTransform(
+            path.join(__dirname, './complexFiles/event.actual.js'),
+            path.join(__dirname, './complexFiles/event.expected.js'),
+            babelOps
+        );
+    });
+
+    it('test ui', () => {
+        return assertTransform(
+            path.join(__dirname, './complexFiles/ui.actual.js'),
+            path.join(__dirname, './complexFiles/ui.expected.js'),
+            babelOps
+        );
+    });
+})
+
 
