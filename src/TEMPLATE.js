@@ -4,6 +4,9 @@ module.exports = {
     requireStat: template(`
         var IMPORT_NAME = require(SOURCE);
     `),
+    justRequireStat: template(`
+        require(SOURCE);
+    `),
     emptyObjectStat: template(`
         var PARAM = {};
     `),

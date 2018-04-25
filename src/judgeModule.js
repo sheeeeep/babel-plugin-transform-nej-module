@@ -1,15 +1,24 @@
 const t = require("babel-types");
+const { get } = require('lodash');
 
-const isDefine = function isDefine(callee) {
-    return callee.name == 'define';
-}
+module.exports = function isNejModule(path) {
+    let calleeNameName = '';
 
-const isNejDefine = function isNejDefine(callee) {
-    return t.isMemberExpression(callee) &&
-        (callee.object && callee.object.name && callee.object.name.toLowerCase() === 'nej') &&
-        (callee.property && callee.property.name === 'define')
-}
+    calleeName = get(path.node, 'callee.name', '');
 
-module.exports = function isNejModule(callee) {
-    return isDefine(callee) || isNejDefine(callee);
-}
+    if (!calleeName) {
+        calleeName = get(path.node, 'callee.object.name', '');
+        calleeName += '.';
+        calleeName += get(path.node, 'callee.property.name', '');
+    }
+
+    calleeName = calleeName.toLowerCase();
+    if (calleeName != 'define' && calleeName != 'nej.define') {
+        return false;
+    }
+    if (calleeName == 'define' && path.scope.hasBinding('define')) {
+        return false;
+    }
+
+    return true;
+};

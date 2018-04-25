@@ -12,6 +12,17 @@ const buildRequires = function (requires) {
 
     return stats;
 };
+
+const buildJustRequires = function (justRequires) {
+    const stats = [];
+    Object.keys(justRequires).forEach(source => {
+        stats.push(TEMPLATE.justRequireStat({
+            SOURCE: t.stringLiteral(source)
+        }))
+    })
+
+    return stats;
+};
 const buildInjectParams = function (arr) {
     const pro = arr[0], o = arr[1], f = arr[2], r = arr[3];
     let stats = [];

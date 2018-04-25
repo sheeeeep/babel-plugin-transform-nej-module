@@ -1,121 +1,103 @@
-let t;
+const { get } = require('lodash');
+const isNejModule = require('./judgeModule');
+const brokenModule = require('./brokenModule');
+const brokenDeps = require('./brokenDeps');
+const { callbackVisitor } = require('./visitors');
 
-module.exports = function (babel) {
-    t = babel.types;
+const t = require("babel-types");
 
-    const judgeModule = require('./judgeModule');
-    const brokenModule = require('./brokenModule');
-    const brokenDeps = require('./brokenDeps');
-    const TEMPLATE = require('./TEMPLATE');
-    const buildUtil = require('./buildUtil');
+/**
+ * 获取nej模块的依赖列表
+ * @param {Array} arguments nej模块参数
+ * @return {Array[String]} 依赖列表
+ */
+const getDeps = function getDeps(arguments) {
+    if (arguments.length === 1) {
+        return [];
+    } else {
+        return (arguments[0].elements || []).map(dep => {
+            return dep.value;
+        });
+    }
+};
+
+/**
+ * 获取回调函数
+ * @param {Array} arguments 
+ * @param {Object} program 
+ */
+const getCallback = function getCallback(arguments, program) {
+    let callback = arguments[1] || arguments[0];
+    const callbackVisitor = {
+        // var foo = function() {...};
+        VariableDeclarator(path) {
+            const left = path.node.id;
+            const right = path.node.init;
+            if (!t.isIdentifier(left) || !t.isFunctionExpression(right)) {
+                return;
+            }
+            if (left.name === this.param) {
+                callback = path.get('init');
+            }
+        },
+        // foo = function() {...}
+        AssignmentExpression(path) {
+            const left = path.node.left;
+            const right = path.node.right;
+            if (!t.isIdentifier(left) || !t.isFunctionExpression(right)) {
+                return;
+            }
+            if (left.name === this.param) {
+                callback = path.get('right');
+            } 
+        }
+    };
+
+    if (t.isFunctionExpression(callback)) {
+        return callback;
+    }
+
+    if (t.isIdentifier(callback)) {
+        const callbackName = callback.name;
+        program.traverse(callbackVisitor, { param: callbackName });
+        return callback;
+    }
+
+    return null;
+};
+
+module.exports = function(babel) {
+    const t = babel.types;
 
     return {
         visitor: {
-            Program(path, state) {
-                const modules = [];
-                const { opts } = state;
+            CallExpression(path, state) {
+                const program = get(path, 'parentPath.parentPath');
+                if (!t.isProgram(program)) {
+                    return;
+                }
 
-                // 只判断第一层代码是否有nej模块
-                path.get('body').forEach(stat => {
-                    let isModule = false, node = stat.node;
-                    if (node && node.expression && node.expression.callee) {
-                        isModule = judgeModule(node.expression.callee)
-                        if (isModule) {
-                            modules.push(stat.get('expression'));
-                        }
-                    }
-                })
+                const pathNode = path.node;
 
-                modules.forEach(module => {
-                    const callbackVisitor = {
-                        VariableDeclarator(path) {
-                            if (t.identifier(path.node.id.name) && path.node.id.name === this.param) {
-                                realCallback = path.get('init');
-                            }
-                        }
-                    }
+                if (!isNejModule(path)) {
+                    return;
+                }
 
-                    const returnVisitor = {
-                        ReturnStatement(path) {
-                            const funcParent = path.getFunctionParent();
-                            let funcName;
-                            try {
-                                if (funcParent && funcParent.node && funcParent.node.id && (funcParent.node.id.name === 'nejModule')) {
-                                    const preSibling = path.key > 0 ? path.getSibling(path.key-1).node : null;
-                                    if(preSibling && preSibling.expression && preSibling.expression.left && preSibling.expression.left.object && preSibling.expression.left.property && preSibling.expression.left.object.name === 'module' && preSibling.node.expression.left.property.name === 'exports') {
-                                        return;
-                                    }
-                                    
-                                    let ret = path.node.argument;
-                                    const exportStat = buildUtil.buildExport(ret);
-                                    path.replaceWithMultiple(exportStat);
-                                    hasReturn = true;
-                                }
-                            } catch (e) {
-                            }
-                        }
-                    }
+                const deps = getDeps(pathNode.arguments);
 
-                    const outputResultVisitor = {
-                        Identifier(path) {
-                            const funcParent = path.getFunctionParent();
-                            let funcName;
-                            try {
-                                if (funcParent && funcParent.node && funcParent.node.id && (funcParent.node.id.name === 'nejModule')) {                                    
-                                    if (path.node.name === this.outputResult) {
-                                        path.node.name = 'exports';
-                                    }
-                                }
-                            } catch (e) {
-                            }
-                        },
-                        AssignmentExpression(path) {
-                            const node = path.node;
-                            if (node.operator === '=' && node.left && node.left.object && node.left.property && node.left.object.name === 'module' && node.left.property.name === 'exports' && node.right && node.right.name === this.outputResult) {
-                                node.right.name = 'exports';
-                            }
-                        }
-                    }
+                // 获取回调函数 start
+                const callback = getCallback(pathNode.arguments, program);
+                if (!callback) {
+                    return;
+                }
 
-                    const moduleNode = module.node;
-                    let hasReturn = false, realCallback;
+                callback.node.id = t.identifier('nejModule'); // return语句和其对应的函数确认眼神的信号
+                // 获取回调函数 end
 
-                    let { deps, cb, hasFindCb } = brokenModule(module.get('arguments'));
-
-                    // 如果找不到(当传入的回调函数为参数时，需要继续寻找其值)
-                    if (!hasFindCb) {
-                        // 只寻找同层代码
-                        module.parentPath.parentPath.traverse(callbackVisitor, { param: cb })
-                        if (realCallback) {
-                            cb = realCallback;
-                        } else {
-                            return;
-                        }
-                    }
-
-                    cb.node.id = t.identifier('nejModule'); // return语句和其对应的函数确认眼神的信号
-                    cb.traverse(returnVisitor);
-
-                    const cbStats = cb.node.body.body;
-                    const depsVal = cb.node.params.map(param => {
-                        return param.name;
-                    });
-                    const { requireStats, txtModuleInitStats, injectParamStats, outputResult } = brokenDeps(deps, depsVal, opts)
-
-                    if(outputResult !== 'exports') {
-                        cb.traverse(outputResultVisitor, { outputResult });
-                    }
-
-                    let stats = requireStats.concat(txtModuleInitStats).concat(injectParamStats).concat(cbStats)
-                    
-                    const rootFunc = TEMPLATE.IEFFStat({
-                        STATEMENTS: stats
-                    });
-
-                    realCallback && realCallback.parentPath.remove();
-
-                    module.replaceWith(rootFunc);
+                const depsVal = get(callback, 'node.param').map(param => {
+                    return param.name;
                 });
+                brokenDeps(deps, depsVal);
             }
         }
     };

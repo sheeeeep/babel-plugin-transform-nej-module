@@ -76,15 +76,21 @@ const normalizeDeps = function (nejDeps, opts) {
 }
 
 module.exports = function (deps, depsVal, opts) {
-    const nejDeps = {};
-    deps.forEach((dep, idx) => {
-        nejDeps[dep] = depsVal[idx] || `randomVal${idx}`;
-    });
 
-    const { txtModuleParam, requires } = normalizeDeps(nejDeps, opts); //json、text、css方式引入的依赖，都按照nej的模式处理为空字符串
+    replacePath(deps, opts.path);
 
-    const injectParams = depsVal.splice(deps.length);
-    // let outputResultExportStat = [];
+    const injectParams = spliceInjectParams(deps, depsVal);
+    const spliceOutputResult = spliceOutputResult(deps, depsVal);
+    const CSSDeps = spliceCSSModules(deps, depsVal);
+    const platforms = splicePlatforms(deps, depsVal);
+
+    const injectParams
+    const spliceOutputResult
+    const CSSDeps
+    const platforms
+    
+    const { txtModuleParam, requires } = normalizeDeps(deps, depsVal); //json、text、css方式引入的依赖，都按照nej的模式处理为空字符串
+
     let injectParamStats = [], outputResult;
     if (injectParams.length) {
         outputResult = injectParams[0];

@@ -1,43 +1,39 @@
 const t = require("babel-types");
 
-module.exports = function ([deps, cb]) {
-    let hasFindCb = true;
-    if (!cb) {
-        cb = deps;
+module.exports = function ([deps, callback]) {
+    let hasFindcallback = true;
+    if (!callback) {
+        callback = deps;
         deps = []
     } else {
-        deps = deps.node;
+        deps = deps.elements || [];
     }
 
-    if (deps && deps.elements) {
-        if (deps.elements.length) {
-            deps = deps.elements.map(ele => {
-                return ele.value;
-            });
-        } else {
-            deps = [];
+    if (deps) {
+        deps = deps.map(dep => {
+            return dep.value;
+        });
+    }
+
+    if (t.isIdentifier(callback)) {
+        return {
+            deps,
+            callback: callback.name,
+            hasFindcallback: false
         }
     }
 
-    if (t.isIdentifier(cb)) {
+    if (t.isFunctionExpression(callback)) {
         return {
             deps,
-            cb: cb.node.name,
-            hasFindCb: false
-        }
-    }
-
-    if (t.isFunctionExpression(cb)) {
-        return {
-            deps,
-            cb,
-            hasFindCb: true
+            callback,
+            hasFindcallback: true
         }
     }
 
     return {
         deps: [],
-        cb: null,
-        hasFindCb: false
+        callback: null,
+        hasFindcallback: false
     }
 }
