@@ -2,14 +2,13 @@
  *  ModalUI 组件带默认UI实现文件
  *
  *  @version  1.0
- *  @author   edu <edu@corp.netease.com>
  *  @module   pool/component-modal/src/modal/web/ui
  */
-NEJ.define( [
+NEJ.define([
     '../component.js',
     'text!./component.html',
     'text!./component.css'
-],function(
+], function(
     Component,
     html,
     css
@@ -40,14 +39,14 @@ NEJ.define( [
      * @param  {string} [type='warning']  - 对话框类型
      * @return {Modal} modal              - 返回该对话框
      */
-    uxModal.alert = function (content, title, okButton, type, klass) {
+    uxModal.alert = function(content, title, okButton, type, klass) {
         var modal = new uxModal({
             data: {
                 'class': klass,
                 content: content,
                 title: title,
                 okButton: okButton,
-                type:type||'warning'
+                type: type || 'warning'
             }
         });
         return modal;
@@ -66,7 +65,7 @@ NEJ.define( [
      * @param  {node} [type= node]          - nodePointer 打点的起始dom
      * @return {Modal} modal                - 返回该对话框
      */
-    uxModal.confirm = function (content, title, okButton, cancelButton, type, nodePointer, klass) {
+    uxModal.confirm = function(content, title, okButton, cancelButton, type, nodePointer, klass) {
         var modal = new uxModal({
             data: {
                 'class': klass,
@@ -74,7 +73,7 @@ NEJ.define( [
                 title: title,
                 okButton: okButton,
                 cancelButton: cancelButton == null ? true : cancelButton,
-                type:type||'warning'
+                type: type || 'warning'
             },
             nodePointer: nodePointer
         });

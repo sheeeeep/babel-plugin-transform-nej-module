@@ -2,7 +2,6 @@
  * --------------------------------------------
  * 原生对象扩展接口
  * @version 1.0
- * @author  genify(caijf@corp.netease.com)
  * --------------------------------------------
  */
 /**
@@ -29,7 +28,7 @@
     var _p = exports;
     var _o = {};
 
-    var _f = function () {};
+    var _f = function() {};
 
     var _r = [];
 
@@ -48,11 +47,11 @@
      * @param  {Function} arg1 - 后置操作，接受一个输入参数，见描述信息
      * @return {Function}        增强后操作函数
      */
-    _extpro._$aop = function (_before, _after) {
+    _extpro._$aop = function(_before, _after) {
         var _after = _after || _f,
             _before = _before || _f,
             _handler = this;
-        return function () {
+        return function() {
             var _event = { args: _r.slice.call(arguments, 0) };
             _before(_event);
             if (!_event.stopped) {
@@ -67,7 +66,7 @@
      *
      *  ```javascript
      *  var scope = {a:0};
-     * 
+     *
      *  var func = function(a,b){
      *      // 第一个参数 ：1
      *      console.log(a);
@@ -76,7 +75,7 @@
      *      // 当前this.a ： 0
      *      console.log(this.a);
      *  };
-     * 
+     *
      *  func._$bind(scope,"1")(2);
      *  ```
      *
@@ -85,11 +84,11 @@
      * @param  {Object} arg0 - 需要保持一致的对象，null表示window对象，此参数外的其他参数作为绑定参数
      * @return {Function}      返回绑定后的函数
      */
-    _extpro._$bind = function () {
+    _extpro._$bind = function() {
         var _args = arguments,
             _object = arguments[0],
             _function = this;
-        return function () {
+        return function() {
             // not use slice for chrome 10 beta and Array.apply for android
             var _argc = _r.slice.call(_args, 1);
             _r.push.apply(_argc, arguments);
@@ -103,7 +102,7 @@
      *
      *  ```javascript
      *  var scope = {a:0};
-     * 
+     *
      *  var func = function(a,b){
      *      // 第一个参数 ：2
      *      console.log(a);
@@ -112,7 +111,7 @@
      *      // 当前this.a ： 0
      *      console.log(this.a);
      *  };
-     * 
+     *
      *  func._$bind(scope,"1")(2);
      *  ```
      *
@@ -121,11 +120,11 @@
      * @param  {Object} arg0 - 需要保持一致的对象，null表示window对象，此参数外的其他参数作为绑定参数
      * @return {Function}      返回绑定后的事件函数
      */
-    _extpro._$bind2 = function () {
+    _extpro._$bind2 = function() {
         var _args = arguments,
             _object = _r.shift.call(_args),
             _function = this;
-        return function () {
+        return function() {
             _r.push.apply(arguments, _args);
             return _function.apply(_object || null, arguments);
         };
@@ -133,9 +132,9 @@
     // for compatiable
     var _extpro = String.prototype;
     if (!_extpro.trim) {
-        _extpro.trim = function () {
+        _extpro.trim = function() {
             var _reg = /(?:^\s+)|(?:\s+$)/g;
-            return function () {
+            return function() {
                 return this.replace(_reg, '');
             };
         }();
@@ -151,7 +150,7 @@
         NEJ = this.NEJ || {};
         // copy object properties
         // only for nej compatiable
-        NEJ.copy = function (a, b) {
+        NEJ.copy = function(a, b) {
             a = a || {};
             b = b || _o;
             for (var x in b) {
@@ -163,8 +162,10 @@
         };
         // NEJ namespace
         NEJ = NEJ.copy(NEJ, {
-            O: _o, R: _r, F: _f,
-            P: function (_namespace) {
+            O: _o,
+            R: _r,
+            F: _f,
+            P: function(_namespace) {
                 if (!_namespace || !_namespace.length) {
                     return null;
                 }
