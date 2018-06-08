@@ -2,7 +2,6 @@
  * ------------------------------------------
  * 事件接口实现文件
  * @version  1.0
- * @author   genify(caijf@corp.netease.com)
  * ------------------------------------------
  */
 /** @module base/event */
@@ -12,7 +11,7 @@ NEJ.define([
     './util.js',
     './chain.js',
     '{platform}event.js'
-],function(NEJ,_e,_u,_x,_h,_p,_o,_f,_r){
+], function(NEJ, _e, _u, _x, _h, _p, _o, _f, _r) {
     // {id:{type:[{type:'click',func:function,sfun:function,capt:true},...]}}
     // id   - element id
     // type - event name, no on prefix
@@ -27,11 +26,11 @@ NEJ.define([
      * @param  {String} 事件类型
      * @return {Array}  事件列表
      */
-    var _getTypeList = (function(){
+    var _getTypeList = (function() {
         var _reg = /[\s,;]+/;
-        return function(_type){
-            var _type = (_type||'').trim().toLowerCase();
-            return !_type?null:_type.split(_reg);
+        return function(_type) {
+            var _type = (_type || '').trim().toLowerCase();
+            return !_type ? null : _type.split(_reg);
         };
     })();
     /*
@@ -41,11 +40,11 @@ NEJ.define([
      * @param  {String} 滚动偏移名称，Left/Top
      * @return {Void}
      */
-    var _getClientOffset = function(_event,_type,_name){
-        var _key1 = 'page'+_type;
-        return _event[_key1]!=null?_event[_key1]:(
-            _event['client'+_type]+
-            _e._$getPageBox()['scroll'+_name]
+    var _getClientOffset = function(_event, _type, _name) {
+        var _key1 = 'page' + _type;
+        return _event[_key1] != null ? _event[_key1] : (
+            _event['client' + _type] +
+            _e._$getPageBox()['scroll' + _name]
         );
     };
     /*
@@ -55,14 +54,14 @@ NEJ.define([
      * @param  {String} 滚动偏移名称，Left/Top
      * @return {Void}
      */
-    var _getPageOffset = function(_event,_type,_name){
-        var _key3 = 'scroll'+_name;
-            _node = _p._$getElement(_event),
-            _xret = _getClientOffset(_event,_type,_name);
-        while(!!_node&&
-                _node!=document.body&&
-                _node!=document.documentElement){
-            _xret += _node[_key3]||0;
+    var _getPageOffset = function(_event, _type, _name) {
+        var _key3 = 'scroll' + _name;
+        _node = _p._$getElement(_event),
+            _xret = _getClientOffset(_event, _type, _name);
+        while (!!_node &&
+            _node != document.body &&
+            _node != document.documentElement) {
+            _xret += _node[_key3] || 0;
             _node = _node.parentNode;
         }
         return _xret;
@@ -75,23 +74,23 @@ NEJ.define([
      * @param  {Boolean}     是否捕获阶段事件，IE低版本浏览器忽略此参数
      * return  {Object}      格式化后参数
      */
-    var _doFormatArgs = function(_element,_type,_handler,_capture){
+    var _doFormatArgs = function(_element, _type, _handler, _capture) {
         var _result = {};
         // check element
         _element = _e._$get(_element);
-        if (!_element){
+        if (!_element) {
             return null;
         }
         _e._$id(_element);
         _result.element = _element;
         // check event handler
-        if (!_u._$isFunction(_handler)){
+        if (!_u._$isFunction(_handler)) {
             return null;
         }
         _result.handler = _handler;
         // check type
         var _type = _getTypeList(_type);
-        if (!_type){
+        if (!_type) {
             return null;
         }
         // save info
@@ -149,16 +148,16 @@ NEJ.define([
      *     // 定义类
      *     _p._$$Klass = _k._$klass();
      *     var _pro = _p._$$Klass._$extend(_t0._$$EventTarget);
-     *     
+     *
      *     // TODO
-     *     
+     *
      *     // 添加自定义事件支持
      *     // 对节点的事件同样支持此自定义事件
      *     _t1._$$CustomEvent._$allocate({
      *         element:_p._$$Klass,
      *         event:['ok','fail']
      *     });
-     * 
+     *
      *     // 使用事件接口添加/删除/调度事件
      *     var _handler = function(_event){
      *         // TODO
@@ -167,7 +166,7 @@ NEJ.define([
      *     _v._$delEvent(_p._$$Klass,'ok',_handler);
      * });
      * ```
-     * 
+     *
      * @method module:base/event._$addEvent
      * @see    module:base/event._$delEvent
      * @param  {String|Node|Object} arg0 - 节点或者类构造或者对象
@@ -180,53 +179,55 @@ NEJ.define([
      * @method CHAINABLE._$addEvent
      * @see module:base/event._$addEvent
      */
-    _p._$addEvent = 
-    _y._$addEvent = (function(){
-        // cache event
-        // type/handler/link
-        var _doCacheEvent = function(_type,_source,_real){
-            var _id = _e._$id(_source.element),
-                _cch_id = _xcache[_id]||{},
-                _cch_tp = _cch_id[_type]||[];
-            _cch_tp.push({
-                type:_real.type||_type,
-                func:_real.handler||_source.handler,
-                sfun:_source.handler,
-                capt:_source.capture,
-                link:_real.link,
-                destroy:_real.destroy
-            });
-            _cch_id[_type] = _cch_tp;
-            _xcache[_id] = _cch_id;
-        };
-        return function(){
-            var _args = _doFormatArgs.apply(null,arguments);
-            if (!_args) return;
-            _u._$forEach(
-                _args.type,function(_name){
-                    var _argc = _h.__checkEvent(
-                        _args.element,
-                        _name,_args.handler
-                    );
-                    // add event
-                    _h.__addEvent(
-                        _args.element,_argc.type,
-                        _argc.handler,_args.capture
-                    );
-                    // add event link
-                    _u._$forIn(
-                        _argc.link,function(_item){
-                            _item[3] = !!_item[3];
-                            _h.__addEvent.apply(_h,_item);
-                            _item[0] = _e._$id(_item[0]);
-                        }
-                    );
-                    // cache event
-                    _doCacheEvent(_name,_args,_argc);
-                }
-            );
-        };
-    })();
+    _p._$addEvent =
+        _y._$addEvent = (function() {
+            // cache event
+            // type/handler/link
+            var _doCacheEvent = function(_type, _source, _real) {
+                var _id = _e._$id(_source.element),
+                    _cch_id = _xcache[_id] || {},
+                    _cch_tp = _cch_id[_type] || [];
+                _cch_tp.push({
+                    type: _real.type || _type,
+                    func: _real.handler || _source.handler,
+                    sfun: _source.handler,
+                    capt: _source.capture,
+                    link: _real.link,
+                    destroy: _real.destroy
+                });
+                _cch_id[_type] = _cch_tp;
+                _xcache[_id] = _cch_id;
+            };
+            return function() {
+                var _args = _doFormatArgs.apply(null, arguments);
+                if (!_args) return;
+                _u._$forEach(
+                    _args.type,
+                    function(_name) {
+                        var _argc = _h.__checkEvent(
+                            _args.element,
+                            _name, _args.handler
+                        );
+                        // add event
+                        _h.__addEvent(
+                            _args.element, _argc.type,
+                            _argc.handler, _args.capture
+                        );
+                        // add event link
+                        _u._$forIn(
+                            _argc.link,
+                            function(_item) {
+                                _item[3] = !!_item[3];
+                                _h.__addEvent.apply(_h, _item);
+                                _item[0] = _e._$id(_item[0]);
+                            }
+                        );
+                        // cache event
+                        _doCacheEvent(_name, _args, _argc);
+                    }
+                );
+            };
+        })();
     /**
      * 节点删除事件，输入参数必须保证与添加接口_$addEvent输入参数完全一致
      *
@@ -279,62 +280,66 @@ NEJ.define([
      * @method CHAINABLE._$delEvent
      * @see module:base/event._$delEvent
      */
-    _p._$delEvent = 
-    _y._$delEvent = (function(){
-        var _unCacheEvent = function(_type,_conf){
-            var _id = _e._$id(_conf.element),
-                _cch_id = _xcache[_id]||_o,
-                _cch_tp = _cch_id[_type],
-                _index = _u._$indexOf(
-                    _cch_tp,function(_item){
-                        // check handler and capture
-                        return _item.sfun===_conf.handler&&
-                               _item.capt===_conf.capture;
-                    }
-                );
-            // check result
-            var _result = null;
-            if (_index>=0){
-                var _item = _cch_tp.splice(_index,1)[0];
-                _result = [[
-                    _conf.element,_item.type,
-                    _item.func,_conf.capture
-                ]];
-                if (!!_item.link){
-                    // complete element by id
-                    _u._$forEach(_item.link,function(v){
-                        v[0] = _e._$get(v[0]);
-                    });
-                    _result.push.apply(_result,_item.link);
-                }
-                if (!!_item.destroy){
-                    _item.destroy();
-                }
-                // clear cache
-                if (!_cch_tp.length){
-                    delete _cch_id[_type];
-                }
-                if (!_u._$hasProperty(_cch_id)){
-                    delete _xcache[_id];
-                }
-            }
-            return _result;
-        };
-        return function(){
-            var _args = _doFormatArgs.apply(null,arguments);
-            if (!_args) return;
-            _u._$forEach(
-                _args.type,function(_name){
-                    _u._$forEach(
-                        _unCacheEvent(_name,_args),
-                        function(_item){
-                            _h.__delEvent.apply(_h,_item);
+    _p._$delEvent =
+        _y._$delEvent = (function() {
+            var _unCacheEvent = function(_type, _conf) {
+                var _id = _e._$id(_conf.element),
+                    _cch_id = _xcache[_id] || _o,
+                    _cch_tp = _cch_id[_type],
+                    _index = _u._$indexOf(
+                        _cch_tp,
+                        function(_item) {
+                            // check handler and capture
+                            return _item.sfun === _conf.handler &&
+                                _item.capt === _conf.capture;
                         }
                     );
+                // check result
+                var _result = null;
+                if (_index >= 0) {
+                    var _item = _cch_tp.splice(_index, 1)[0];
+                    _result = [
+                        [
+                            _conf.element, _item.type,
+                            _item.func, _conf.capture
+                        ]
+                    ];
+                    if (!!_item.link) {
+                        // complete element by id
+                        _u._$forEach(_item.link, function(v) {
+                            v[0] = _e._$get(v[0]);
+                        });
+                        _result.push.apply(_result, _item.link);
+                    }
+                    if (!!_item.destroy) {
+                        _item.destroy();
+                    }
+                    // clear cache
+                    if (!_cch_tp.length) {
+                        delete _cch_id[_type];
+                    }
+                    if (!_u._$hasProperty(_cch_id)) {
+                        delete _xcache[_id];
+                    }
                 }
-            );
-        };
-    })();
+                return _result;
+            };
+            return function() {
+                var _args = _doFormatArgs.apply(null, arguments);
+                if (!_args) return;
+                _u._$forEach(
+                    _args.type,
+                    function(_name) {
+                        _u._$forEach(
+                            _unCacheEvent(_name, _args),
+                            function(_item) {
+                                _h.__delEvent.apply(_h, _item);
+                            }
+                        );
+                    }
+                );
+            };
+        })();
     /**
      * 清除节点事件
      *
@@ -386,41 +391,44 @@ NEJ.define([
      * @method CHAINABLE._$clearEvent
      * @see module:base/event._$clearEvent
      */
-    _p._$clearEvent = 
-    _y._$clearEvent = (function(){
-        var _doClearEvent = function(_id,_name,_list){
-            _u._$reverseEach(
-                _list,function(_item){
-                    _p._$delEvent(
-                        _id,_name,_item.sfun,_item.capt
-                    );
+    _p._$clearEvent =
+        _y._$clearEvent = (function() {
+            var _doClearEvent = function(_id, _name, _list) {
+                _u._$reverseEach(
+                    _list,
+                    function(_item) {
+                        _p._$delEvent(
+                            _id, _name, _item.sfun, _item.capt
+                        );
+                    }
+                );
+            };
+            return function(_element, _type) {
+                var _id = _e._$id(_element);
+                if (!_id) return;
+                var _cch_id = _xcache[_id];
+                if (!!_cch_id) {
+                    _type = _getTypeList(_type);
+                    if (!!_type) {
+                        // clear event by type
+                        _u._$forEach(
+                            _type,
+                            function(_name) {
+                                _doClearEvent(_id, _name, _cch_id[_name]);
+                            }
+                        );
+                    } else {
+                        // clear all event
+                        _u._$loop(
+                            _cch_id,
+                            function(_value, _name) {
+                                _p._$clearEvent(_element, _name);
+                            }
+                        );
+                    }
                 }
-            );
-        };
-        return function(_element,_type){
-            var _id = _e._$id(_element);
-            if (!_id) return;
-            var _cch_id = _xcache[_id];
-            if (!!_cch_id){
-                _type = _getTypeList(_type);
-                if (!!_type){
-                    // clear event by type
-                    _u._$forEach(
-                        _type,function(_name){
-                            _doClearEvent(_id,_name,_cch_id[_name]);
-                        }
-                    );
-                }else{
-                    // clear all event
-                    _u._$loop(
-                        _cch_id,function(_value,_name){
-                            _p._$clearEvent(_element,_name);
-                        }
-                    );
-                }
-            }
-        };
-    })();
+            };
+        })();
     /**
      * 触发对象的某个事件，注：对于IE浏览器该接口节点事件有以下限制
      *
@@ -469,22 +477,23 @@ NEJ.define([
      * @method CHAINABLE._$dispatchEvent
      * @see module:base/event._$dispatchEvent
      */
-    _p._$dispatchEvent = 
-    _y._$dispatchEvent = function(_element,_type,_options){
-        var _element = _e._$get(_element);
-        if (!!_element){
-            _u._$forEach(
-                _getTypeList(_type),function(_name){
-                    var _result = _h.__checkEvent(
-                        _element,_name
-                    );
-                    _h.__dispatchEvent(
-                        _element,_result.type,_options
-                    );
-                }
-            );
-        }
-    };
+    _p._$dispatchEvent =
+        _y._$dispatchEvent = function(_element, _type, _options) {
+            var _element = _e._$get(_element);
+            if (!!_element) {
+                _u._$forEach(
+                    _getTypeList(_type),
+                    function(_name) {
+                        var _result = _h.__checkEvent(
+                            _element, _name
+                        );
+                        _h.__dispatchEvent(
+                            _element, _result.type, _options
+                        );
+                    }
+                );
+            }
+        };
     /**
      * 获取触发事件的节点，可以传入过滤接口来遍历父节点找到符合条件的节点
      *
@@ -550,12 +559,12 @@ NEJ.define([
      * @param  {Function} arg1 - 过滤接口
      * @return {Node}            符合条件的节点
      */
-    _p._$getElement = function(_event){
+    _p._$getElement = function(_event) {
         if (!_event) return null;
-        var _element = _event.target||
-                _event.srcElement,
+        var _element = _event.target ||
+            _event.srcElement,
             _filter = arguments[1];
-        return _e._$getParent(_element,_filter);
+        return _e._$getParent(_element, _filter);
     };
     /**
      * 阻止事件，包括默认事件和传递事件
@@ -597,7 +606,7 @@ NEJ.define([
      * @param  {Event} arg0 - 要阻止的事件对象
      * @return {Void}
      */
-    _p._$stop = function(_event){
+    _p._$stop = function(_event) {
         _p._$stopBubble(_event);
         _p._$stopDefault(_event);
     };
@@ -640,11 +649,11 @@ NEJ.define([
      * @param  {Event} arg0 - 要阻止的事件对象
      * @return {Void}
      */
-    _p._$stopBubble = function(_event){
-        if (!!_event){
-            !!_event.stopPropagation
-            ? _event.stopPropagation()
-            : _event.cancelBubble = !0;
+    _p._$stopBubble = function(_event) {
+        if (!!_event) {
+            !!_event.stopPropagation ?
+                _event.stopPropagation() :
+                _event.cancelBubble = !0;
         }
     };
     /**
@@ -686,10 +695,10 @@ NEJ.define([
      * @return {Void}
      */
     _p._$stopDefault = function(_event) {
-        if (!!_event){
-            !!_event.preventDefault
-            ? _event.preventDefault()
-            : _event.returnValue = !1;
+        if (!!_event) {
+            !!_event.preventDefault ?
+                _event.preventDefault() :
+                _event.returnValue = !1;
         }
     };
     /**
@@ -721,10 +730,10 @@ NEJ.define([
      * @param  {Event}  arg0 - 事件对象
      * @return {Object}        位置信息，{x:10,y:10}
      */
-    _p._$page = function(_event){
+    _p._$page = function(_event) {
         return {
-            x:_p._$pageX(_event),
-            y:_p._$pageY(_event)
+            x: _p._$pageX(_event),
+            y: _p._$pageY(_event)
         };
     };
     /**
@@ -755,8 +764,8 @@ NEJ.define([
      * @param  {Event}  arg0 - 事件对象
      * @return {Number}        水平位置
      */
-    _p._$pageX = function(_event){
-        return _getPageOffset(_event,'X','Left');
+    _p._$pageX = function(_event) {
+        return _getPageOffset(_event, 'X', 'Left');
     };
     /**
      * 取事件相对于页面顶部的位置，累加所有内部滚动高度
@@ -786,8 +795,8 @@ NEJ.define([
      * @param  {Event}  arg0 - 事件对象
      * @return {Number}        垂直位置
      */
-    _p._$pageY = function(_event){
-        return _getPageOffset(_event,'Y','Top');
+    _p._$pageY = function(_event) {
+        return _getPageOffset(_event, 'Y', 'Top');
     };
     /**
      * 取事件相对于页面左侧的位置，仅累加页面滚动高度
@@ -817,8 +826,8 @@ NEJ.define([
      * @param  {Event}  arg0 - 事件对象
      * @return {Number}        水平位置
      */
-    _p._$clientX = function(_event){
-        return _getClientOffset(_event,'X','Left');
+    _p._$clientX = function(_event) {
+        return _getClientOffset(_event, 'X', 'Left');
     };
     /**
      * 取事件相对于页面顶部的位置，仅累加页面滚动高度
@@ -848,15 +857,15 @@ NEJ.define([
      * @param  {Event}  arg0 - 事件对象
      * @return {Number}        垂直位置
      */
-    _p._$clientY = function(_event){
-        return _getClientOffset(_event,'Y','Top');
+    _p._$clientY = function(_event) {
+        return _getClientOffset(_event, 'Y', 'Top');
     };
-    
+
     // for chainable method
     _x._$merge(_y);
-    
-    if (CMPT){
-        NEJ.copy(NEJ.P('nej.v'),_p);
+
+    if (CMPT) {
+        NEJ.copy(NEJ.P('nej.v'), _p);
     }
 
     return _p;

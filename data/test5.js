@@ -2,16 +2,15 @@
  *  输入组件基类文件
  *
  *  @version  1.0
- *  @author   hzshaoyy <hzshaoyy@corp.netease.com>
  *  @module   pool/component-input/src/base/component
  */
 
-NEJ.define( [
+NEJ.define([
     'pool/component-base/src/base',
     'pool/component-base/src/util',
     'pool/component-validation/src/validation',
     'base/platform'
-],function(
+], function(
     Component,
     util,
     Validation,
@@ -19,11 +18,11 @@ NEJ.define( [
 ) {
 
     return Component.$extends({
-        config: function () {
+        config: function() {
             util.extend(this.data, {
                 value: '',
                 state: 'normal',
-                eltIE9: platform._$KERNEL.browser == 'ie' && platform._$KERNEL.version*1 <= 5,
+                eltIE9: platform._$KERNEL.browser == 'ie' && platform._$KERNEL.version * 1 <= 5,
                 /**
                  * placeholder的值
                  *
@@ -146,19 +145,19 @@ NEJ.define( [
          * @method module:pool/component-input/src/base/component.BaseInput#init
          * @return {Void}
          */
-        init: function(){
+        init: function() {
             this.supr();
 
-            if(this.data.autofocus){
+            if (this.data.autofocus) {
                 //init的时候，input即使存在但可能还没有显示，所以来个延迟
-                window.setTimeout(function(){
+                window.setTimeout(function() {
                     this.focus();
                 }._$bind(this), 50);
             }
 
-            if(this.data.autoselect){
+            if (this.data.autoselect) {
                 //init的时候，input即使存在但可能还没有显示，所以来个延迟
-                window.setTimeout(function(){
+                window.setTimeout(function() {
                     this.select();
                 }._$bind(this), 50);
             }
@@ -171,9 +170,9 @@ NEJ.define( [
          * @method module:pool/component-input/src/base/component.BaseInput#onkeyup
          * @return {Void}
          */
-        onkeyup: function(_event){
+        onkeyup: function(_event) {
             //ie9以下先赋值，否则validate更新不够及时
-            if(this.data.eltIE9 && _event.target && _event.target.value != null){
+            if (this.data.eltIE9 && _event.target && _event.target.value != null) {
                 this.data.value = _event.target.value;
             }
 
@@ -186,12 +185,12 @@ NEJ.define( [
              * @param {String} options.value      - input内容
              *
              */
-            if(this.data.isRealTime){
+            if (this.data.isRealTime) {
                 this.validate();
             }
             this.$emit('keyup', this.getReturnEvent(_event));
 
-            if(_event.which == 13){
+            if (_event.which == 13) {
                 /**
                  * enter回车事件
                  *
@@ -203,7 +202,7 @@ NEJ.define( [
                  */
                 this.$emit('enter', this.getReturnEvent(_event));
             }
-            if(_event.which == 38){
+            if (_event.which == 38) {
                 /**
                  * up事件
                  *
@@ -215,7 +214,7 @@ NEJ.define( [
                  */
                 this.$emit('up', this.getReturnEvent(_event));
             }
-            if(_event.which == 40){
+            if (_event.which == 40) {
                 /**
                  * down事件
                  *
@@ -235,9 +234,9 @@ NEJ.define( [
          * @method module:pool/component-input/src/base/component.BaseInput#onkeydown
          * @return {Void}
          */
-        onkeydown: function(_event){
+        onkeydown: function(_event) {
             //ie9以下先赋值，否则validate更新不够及时
-            if(this.data.eltIE9 && _event.target && _event.target.value != null){
+            if (this.data.eltIE9 && _event.target && _event.target.value != null) {
                 this.data.value = _event.target.value;
             }
 
@@ -250,7 +249,7 @@ NEJ.define( [
              * @param {String} options.value      - input内容
              *
              */
-            if(this.data.isRealTime){
+            if (this.data.isRealTime) {
                 this.validate();
             }
             this.$emit('keydown', this.getReturnEvent());
@@ -262,9 +261,9 @@ NEJ.define( [
          * @method module:pool/component-input/src/base/component.BaseInput#oninput
          * @return {Void}
          */
-        oninput: function(_event){
+        oninput: function(_event) {
             //ie9以下先赋值，否则validate更新不够及时
-            if(this.data.eltIE9 && _event.target && _event.target.value != null){
+            if (this.data.eltIE9 && _event.target && _event.target.value != null) {
                 this.data.value = _event.target.value;
             }
 
@@ -277,7 +276,7 @@ NEJ.define( [
              * @param {String} options.value      - input内容
              *
              */
-            if(this.data.isRealTime){
+            if (this.data.isRealTime) {
                 this.validate();
             }
             this.$emit('input', this.getReturnEvent());
@@ -291,7 +290,7 @@ NEJ.define( [
          * @method module:pool/component-input/src/base/component.BaseInput#getReturnEvent
          * @returns {{sender: this, value: value}}
          */
-        getReturnEvent: function (event) {
+        getReturnEvent: function(event) {
             return {
                 event: event,
                 sender: this,
@@ -306,9 +305,9 @@ NEJ.define( [
          * @method module:pool/component-input/src/base/component.BaseInput#onblur
          * @return {Void}
          */
-        onblur: function(){
+        onblur: function() {
             //UTF-8编码有可能是两个、三个、四个字节。Emoji表情是4个字节，而MySQL的utf8编码最多3个字节，过滤Emoji
-            if( this.data.replaceEmoji && this.data.value && this.data.value.replace ){
+            if (this.data.replaceEmoji && this.data.value && this.data.value.replace) {
                 this.data.value = this.data.value.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, "");
             }
             /**
@@ -318,7 +317,7 @@ NEJ.define( [
              * @param {String} options.value      - input内容
              *
              */
-            if(this.data.blurValidate){
+            if (this.data.blurValidate) {
                 this.validate();
             }
             this.$emit('blur', this.getReturnEvent());
@@ -330,7 +329,7 @@ NEJ.define( [
          * @method module:pool/component-input/src/base/component.BaseInput#onfocus
          * @return {Void}
          */
-        onfocus: function(){
+        onfocus: function() {
             /**
              * @event module:pool/component-input/src/base/component.BaseInput#focus
              * @param {Object} options            - 组件构造参数
@@ -338,10 +337,10 @@ NEJ.define( [
              * @param {String} options.value      - input内容
              */
 
-            if(this.data.clearErrorOnfocus){
+            if (this.data.clearErrorOnfocus) {
                 this.clearErrorMsg();
-            } 
-            
+            }
+
             this.$emit('focus', this.getReturnEvent());
         },
         /**
@@ -351,9 +350,9 @@ NEJ.define( [
          * @method module:pool/component-input/src/base/component.BaseInput#focus
          * @return {Void}
          */
-        focus: function(){
+        focus: function() {
             var _input = this.$refs && this.$refs.input;
-            if(_input && typeof _input.focus === 'function'){
+            if (_input && typeof _input.focus === 'function') {
                 _input.focus();
             }
         },
@@ -364,9 +363,9 @@ NEJ.define( [
          * @method module:pool/component-input/src/base/component.BaseInput#blur
          * @return {Void}
          */
-        blur: function(){
+        blur: function() {
             var _input = this.$refs && this.$refs.input;
-            if(_input && typeof _input.blur === 'function'){
+            if (_input && typeof _input.blur === 'function') {
                 _input.blur();
             }
         },
@@ -378,9 +377,9 @@ NEJ.define( [
          * @method module:pool/component-input/src/base/component.BaseInput#select
          * @return {Void}
          */
-        select: function(){
+        select: function() {
             var _input = this.$refs && this.$refs.input;
-            if(_input && typeof _input.select === 'function'){
+            if (_input && typeof _input.select === 'function') {
                 _input.select();
             }
         },
@@ -393,7 +392,7 @@ NEJ.define( [
          * @method module:pool/component-input/src/base/component.BaseInput#resetValue
          * @return {Void}
          */
-        resetValue: function(){
+        resetValue: function() {
 
             this.data.value = '';
             this.$update();
@@ -407,8 +406,8 @@ NEJ.define( [
 
             //处理父子组件无法及时同步value值
             var that = this;
-            window.setTimeout(function(){
-                that.$emit('reset',{
+            window.setTimeout(function() {
+                that.$emit('reset', {
                     value: that.data.value
                 });
             }, 30);
@@ -421,15 +420,15 @@ NEJ.define( [
          * @method module:pool/component-input/src/base/component.BaseInput#validate
          * @return {Void}
          */
-        validate: function(){
+        validate: function() {
             return !!this.$refs.validation && this.$refs.validation.validate(this.data.value, this.data.isRealTime);
         },
 
         /**
          * focus清空错误提醒
          */
-        clearErrorMsg: function(){
-            if(this.$refs.validation){
+        clearErrorMsg: function() {
+            if (this.$refs.validation) {
                 this.$refs.validation.data.message = '';
                 this.$refs.validation.data.state = 'normal';
             }
