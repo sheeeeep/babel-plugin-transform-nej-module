@@ -2,7 +2,6 @@
  * --------------------------------------------
  * 原生对象扩展接口
  * @version 1.0
- * @author  genify(caijf@corp.netease.com)
  * --------------------------------------------
  */
 /**
@@ -25,7 +24,7 @@
  * 内置函数对象扩展
  * @external Function
  */
-NEJ.define(function(_p,_o,_f,_r){
+NEJ.define(function(_p, _o, _f, _r) {
     var _extpro = Function.prototype;
     /**
      * AOP增强操作，增强操作接受一个输入参数包含以下信息
@@ -41,15 +40,15 @@ NEJ.define(function(_p,_o,_f,_r){
      * @param  {Function} arg1 - 后置操作，接受一个输入参数，见描述信息
      * @return {Function}        增强后操作函数
      */
-    _extpro._$aop = function(_before,_after){
-        var _after = _after||_f,
-            _before = _before||_f,
+    _extpro._$aop = function(_before, _after) {
+        var _after = _after || _f,
+            _before = _before || _f,
             _handler = this;
-        return function(){
-            var _event = {args:_r.slice.call(arguments,0)};
+        return function() {
+            var _event = { args: _r.slice.call(arguments, 0) };
             _before(_event);
-            if (!_event.stopped){
-                _event.value = _handler.apply(this,_event.args);
+            if (!_event.stopped) {
+                _event.value = _handler.apply(this, _event.args);
                 _after(_event);
             }
             return _event.value;
@@ -60,7 +59,7 @@ NEJ.define(function(_p,_o,_f,_r){
      *
      *  ```javascript
      *  var scope = {a:0};
-     * 
+     *
      *  var func = function(a,b){
      *      // 第一个参数 ：1
      *      console.log(a);
@@ -69,7 +68,7 @@ NEJ.define(function(_p,_o,_f,_r){
      *      // 当前this.a ： 0
      *      console.log(this.a);
      *  };
-     * 
+     *
      *  func._$bind(scope,"1")(2);
      *  ```
      *
@@ -82,11 +81,11 @@ NEJ.define(function(_p,_o,_f,_r){
         var _args = arguments,
             _object = arguments[0],
             _function = this;
-        return function(){
+        return function() {
             // not use slice for chrome 10 beta and Array.apply for android
-            var _argc = _r.slice.call(_args,1);
-            _r.push.apply(_argc,arguments);
-            return _function.apply(_object||null,_argc);
+            var _argc = _r.slice.call(_args, 1);
+            _r.push.apply(_argc, arguments);
+            return _function.apply(_object || null, _argc);
         };
     };
     /**
@@ -96,7 +95,7 @@ NEJ.define(function(_p,_o,_f,_r){
      *
      *  ```javascript
      *  var scope = {a:0};
-     * 
+     *
      *  var func = function(a,b){
      *      // 第一个参数 ：2
      *      console.log(a);
@@ -105,7 +104,7 @@ NEJ.define(function(_p,_o,_f,_r){
      *      // 当前this.a ： 0
      *      console.log(this.a);
      *  };
-     * 
+     *
      *  func._$bind(scope,"1")(2);
      *  ```
      *
@@ -118,37 +117,37 @@ NEJ.define(function(_p,_o,_f,_r){
         var _args = arguments,
             _object = _r.shift.call(_args),
             _function = this;
-        return function(){
-            _r.push.apply(arguments,_args);
-            return _function.apply(_object||null,arguments);
+        return function() {
+            _r.push.apply(arguments, _args);
+            return _function.apply(_object || null, arguments);
         };
     };
     // for compatiable
     var _extpro = String.prototype;
-    if (!_extpro.trim){
-         _extpro.trim = (function(){
+    if (!_extpro.trim) {
+        _extpro.trim = (function() {
             var _reg = /(?:^\s+)|(?:\s+$)/g;
-            return function(){
-                return this.replace(_reg,'');
+            return function() {
+                return this.replace(_reg, '');
             };
-         })();
+        })();
     }
-    if (!this.console){
+    if (!this.console) {
         this.console = {
-            log:_f,
-            error:_f
+            log: _f,
+            error: _f
         };
     }
 
-    if (CMPT){
-        NEJ = this.NEJ||{};
+    if (CMPT) {
+        NEJ = this.NEJ || {};
         // copy object properties
         // only for nej compatiable
-        NEJ.copy = function(a,b){
-            a = a||{};
-            b = b||_o;
-            for(var x in b){
-                if (b.hasOwnProperty(x)){
+        NEJ.copy = function(a, b) {
+            a = a || {};
+            b = b || _o;
+            for (var x in b) {
+                if (b.hasOwnProperty(x)) {
                     a[x] = b[x];
                 }
             }
@@ -156,21 +155,22 @@ NEJ.define(function(_p,_o,_f,_r){
         };
         // NEJ namespace
         NEJ = NEJ.copy(
-            NEJ,{
-                O:_o,R:_r,F:_f,
-                P:function(_namespace){
-                    if (!_namespace||!_namespace.length){
+            NEJ, {
+                O: _o,
+                R: _r,
+                F: _f,
+                P: function(_namespace) {
+                    if (!_namespace || !_namespace.length) {
                         return null;
                     }
                     var _package = window;
-                    for(var a=_namespace.split('.'),
-                            l=a.length,i=(a[0]=='window')?1:0;i<l;
-                            _package=_package[a[i]]=_package[a[i]]||{},i++);
-                    return  _package;
+                    for (var a = _namespace.split('.'),
+                            l = a.length, i = (a[0] == 'window') ? 1 : 0; i < l; _package = _package[a[i]] = _package[a[i]] || {}, i++);
+                    return _package;
                 }
             }
         );
-        
+
         return NEJ;
     }
 

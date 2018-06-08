@@ -2,14 +2,12 @@
  * ----------------------------------------------------------
  * 拖拽数据模型
  * @version  1.0
- * @author cqh <cqh@corp.netease.com>
  * @module pool/component-drag-drop/src/dragDrop
  *
  */
-NEJ.define([
-],function(
+NEJ.define([], function(
 
-){
+) {
     var dragdrop = {
         dragging: false,
         data: null,
