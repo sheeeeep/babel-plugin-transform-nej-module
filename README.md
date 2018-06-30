@@ -1,6 +1,6 @@
 # babel-plugin-transform-nej-module
 
-使用webpack打包nej。通过本插件，可以将nej的依赖管理系统转换为标准AMD格式，使得webpack能够对它进行打包。
+使用webpack打包nej。通过本插件，可以将nej的依赖管理系统转换为标准CMD格式，使得webpack能够对它进行打包。
 
 ## 示例
 原NEJ模块文件
@@ -30,13 +30,13 @@ NEJ.define( [
     var css = require('./component.css');
 
     var css = "";
-    
+
     var pro = exports;
-    
+
     var o = {};
     var f = function () {};
     var r = [];
-    
+
     module.exports = uxModal;
     return;
 }).call(window);
