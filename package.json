@@ -2,7 +2,7 @@
     "name": "babel-plugin-transform-nej-module",
     "version": "2.1.4",
     "description": "transform nej module to require",
-    "main": "lib/index.js",
+    "main": "src/index.js",
     "scripts": {
         "build": "babel src -d dist --source-maps"
     },
