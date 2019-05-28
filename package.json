@@ -22,14 +22,11 @@
     },
     "homepage": "https://github.com/sheeeeep/babel-plugin-transform-nej-module#readme",
     "dependencies": {
-        "babel-core": "^6.26.0",
-        "babel-generator": "^6.26.1",
         "babel-types": "^6.26.0",
         "babel-template": "^6.26.0"
     },
     "devDependencies": {
         "assert-transform": "^1.0.0",
-        "babel-preset-env": "^1.6.1",
         "mocha": "^5.1.0"
     }
 }
